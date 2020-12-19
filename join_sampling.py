@@ -154,16 +154,16 @@ def sample_join_method_c(table_left, table_right, sample_size=50):
     i=0
 
     while len(random_join) < sample_size:
-        current_round = len(random_join) % 2
+        # current_round = len(random_join) % 2
+        current_round = 0
         i+=1
-        current_round_mapping = sample_round_to_side_mapping[current_round]
+        #c current_round_mapping = sample_round_to_side_mapping[current_round]
 
         sampled_tuple = sample_from_table_1_and_join_table_2(
-            table1=current_round_mapping['table1'],
-            table2=current_round_mapping['table2'],
-            do_not_touch_table1=current_round_mapping['do_not_touch'],
-            index_to_using_stats_table_2=current_round_mapping['index_to_using_stats'],
-            index_to_using_stats_table_1=current_round_mapping['index_to_using_stats2'])
+            table1=table_left,
+            table2=table_right,
+            index_to_using_stats_table_2=index_to_using_stats_in_table_right,
+            index_to_using_stats_table_1=index_to_using_stats_in_table_left)
 
         if sampled_tuple:
             random_join.append(sampled_tuple)
@@ -172,7 +172,7 @@ def sample_join_method_c(table_left, table_right, sample_size=50):
     print(Counter([x[0] for x in random_join]))
 
 
-def sample_from_table_1_and_join_table_2(table1, table2, do_not_touch_table1, index_to_using_stats_table_2, index_to_using_stats_table_1):
+def sample_from_table_1_and_join_table_2(table1, table2, do_not_touch_table1, index_to_using_stats_table_2):
     candidate_index, candidate_value = sample_candidate_from_table(table=table1, do_not_touch=do_not_touch_table1)
     # maximum_times_this_candidate_can_participate = table2[candidate_value]
 
@@ -186,9 +186,9 @@ def sample_from_table_1_and_join_table_2(table1, table2, do_not_touch_table1, in
 
     if match_join_index_and_value:
         return (candidate_value, match_join_index_and_value[1])
-    else:
-        # means that it can't be joined anymore, so let's block it
-        do_not_touch_table1.update({index for index, stats in index_to_using_stats_table_1.items() if stats['original_value']==candidate_value})
+    # else:
+    #     # means that it can't be joined anymore, so let's block it
+    #     do_not_touch_table1.update({index for index, stats in index_to_using_stats_table_1.items() if stats['original_value']==candidate_value})
 
     return None
 
@@ -198,12 +198,13 @@ def sample_from_full_joint(table_left, table_right, sample_size):
     print('real join results: ', Counter([x[0] for x in sampled]))
 
 def main():
-    L1 = [2] + [1] * 3000
-    L2 = [1] + [2] * 7000
+    L1 = [2] + [1] * 100
+    L2 = [1] + [2] * 200
     # sample_join_method_a(L1, L2, 1000)
 
-    sample_from_full_joint(L1, L2, 50)
-    sample_join_method_c(L1, L2, 50)
+    for i in range(10):
+        sample_from_full_joint(L1, L2, 100)
+    #sample_join_method_c(L1, L2, 50)
 
 
 if __name__ == "__main__":
