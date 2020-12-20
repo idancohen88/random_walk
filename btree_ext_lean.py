@@ -26,8 +26,9 @@ class OOBTreeExtLean(_OOBTree):
         k = min(len(self), k)
         sampled_values = []
         all_walking_paths_set = set()
+        all_walking_paths_stats = []
         while len(sampled_values) < k:
-            sampled_value, walking_path, acc_rej_test_acceptance_prob = \
+            sampled_value, walking_path, walking_path_stats  = \
                 self._get_value_and_path_by_random_walk_from_node(node=self)
 
             if _this_value_was_sampled_already(walking_path, all_walking_paths_set):
@@ -37,12 +38,12 @@ class OOBTreeExtLean(_OOBTree):
             accept_reject_measures = {
                 'path': walking_path,
                 'value': sampled_value,
-                'acceptance_prob': acc_rej_test_acceptance_prob
             }
 
             all_accept_reject_measures['accept'].append(accept_reject_measures)
 
             all_walking_paths_set.add(str(walking_path))
+            all_walking_paths_stats.append(walking_path_stats)
             sampled_values.append(sampled_value)
 
         add_to_debug_global(locals())
@@ -52,17 +53,30 @@ class OOBTreeExtLean(_OOBTree):
     def _get_value_and_path_by_random_walk_from_node(self, node):
         walking_path = []
         current_node = node
-
+        prob_along_path = 1
+        walking_path_stats = []
         while not isinstance(current_node, self._bucket_type):
-            next_random_step = self._random_next_move_respect_fanout_prob(current_node, walking_path)
+            next_random_step, chosen_random_step_prob = self._random_next_move_respect_fanout_prob(current_node, walking_path)
+            prob_along_path *= chosen_random_step_prob
+            walking_path.append((next_random_step, current_node.size, chosen_random_step_prob, prob_along_path))
             current_node = current_node._data[next_random_step].child
-            walking_path.append((next_random_step, current_node.size))
+            walking_path_stats.append({
+                'next_random_step': next_random_step,
+                'chosen_random_step_prob':
+                    chosen_random_step_prob, 'prob_along_path':prob_along_path})
 
         next_random_step = np.random.randint(low=0, high=current_node.size)
-        walking_path.append((next_random_step, current_node.size))
+        chosen_random_step_prob = 1/current_node.size
+        prob_along_path *= chosen_random_step_prob
+        walking_path.append((next_random_step, current_node.size, chosen_random_step_prob, prob_along_path))
+        walking_path_stats.append({
+            'next_random_step': next_random_step,
+            'chosen_random_step_prob':
+                chosen_random_step_prob, 'prob_along_path': prob_along_path,
+            'entire_walking_path': walking_path})
 
         leaf = current_node._keys
-        return leaf[next_random_step], walking_path
+        return leaf[next_random_step], walking_path, walking_path_stats
 
 
     def _random_next_move_respect_fanout_prob(self, current_node, walking_path):
@@ -74,7 +88,9 @@ class OOBTreeExtLean(_OOBTree):
             node_distribution = all_sizes / sum(all_sizes)
             self.walking_path_to_fanout_distribution[walking_path_str] = node_distribution
 
-        return np.random.choice(current_node.size, p=node_distribution)
+        next_random_step = np.random.choice(current_node.size, p=node_distribution)
+        chosen_random_step_prob = node_distribution[next_random_step]
+        return next_random_step, chosen_random_step_prob
 
 
     def join(self, right_tree):
@@ -87,7 +103,8 @@ def add_to_debug_global(all_vars):
         'params': {
             'k': all_vars['k'],
         },
-        'all_accept_reject_measures': all_vars['all_accept_reject_measures']
+        'all_accept_reject_measures': all_vars['all_accept_reject_measures'],
+        'all_walking_paths_stats': all_vars['all_walking_paths_stats']
     })
 
 
