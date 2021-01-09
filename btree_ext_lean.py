@@ -66,7 +66,7 @@ class OOBTreeExtLean(_OOBTree):
                     chosen_random_step_prob, 'prob_along_path':prob_along_path})
 
         next_random_step = np.random.randint(low=0, high=current_node.size)
-        chosen_random_step_prob = 1/current_node.size
+        chosen_random_step_prob = 1/current_node.max_leaf_size  # todo: size
         prob_along_path *= chosen_random_step_prob
         walking_path.append((next_random_step, current_node.size, chosen_random_step_prob, prob_along_path))
         walking_path_stats.append({
@@ -81,15 +81,19 @@ class OOBTreeExtLean(_OOBTree):
 
     def _random_next_move_respect_fanout_prob(self, current_node, walking_path):
         walking_path_str = str(walking_path)
+        is_child_bucket = isinstance(current_node._data[0].child, self._bucket_type)
         if walking_path_str in self.walking_path_to_fanout_distribution:
             node_distribution = self.walking_path_to_fanout_distribution[walking_path_str]
         else:
-            all_sizes = np.array([node.child.size for node in current_node._data])
+            if not is_child_bucket:
+                all_sizes = np.array([node.child.size for node in current_node._data])
+            else:
+                all_sizes = np.array([current_node.max_leaf_size] * len(current_node._data))
             node_distribution = all_sizes / sum(all_sizes)
             self.walking_path_to_fanout_distribution[walking_path_str] = node_distribution
 
         next_random_step = np.random.choice(current_node.size, p=node_distribution)
-        chosen_random_step_prob = node_distribution[next_random_step]
+        chosen_random_step_prob = node_distribution[next_random_step] if not is_child_bucket else node_distribution[0]
         return next_random_step, chosen_random_step_prob
 
 
@@ -103,6 +107,7 @@ def add_to_debug_global(all_vars):
         'params': {
             'k': all_vars['k'],
         },
+        'tree_size': len(all_vars['self']),
         'all_accept_reject_measures': all_vars['all_accept_reject_measures'],
         'all_walking_paths_stats': all_vars['all_walking_paths_stats']
     })
@@ -110,3 +115,4 @@ def add_to_debug_global(all_vars):
 
 def _this_value_was_sampled_already(walking_path, all_walking_paths_set):
     return str(walking_path) in all_walking_paths_set
+

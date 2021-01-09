@@ -1,14 +1,14 @@
 from BTrees.OOBTree import OOBTree
 import numpy as np
 
-from btree_ext_lean import OOBTreeExt
+from btree_ext import OOBTreeExt
 
 CHUNKS_SIZE = 10000
 KEY_LENGTH = 8
 ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 def generate_btree_index_x_values_with_dist(num_of_values, disired_prefix_to_percent_dist, my_index=None):
-    my_index = my_index or OOBTreeExt()#OOBTree()
+    my_index = my_index if my_index is not None else OOBTreeExt()
     for prefix, amount_percent in disired_prefix_to_percent_dist.items():
         amount = int(num_of_values * amount_percent)
         my_index = insert_to_index_random(my_index, amount, prefix)
