@@ -1,6 +1,7 @@
 import uuid
 from collections import Counter
 import random
+import numpy as np
 
 def _full_join(table_left, table_right):
     return [(i[0], i[1], j[1]) for i in table_left for j in table_right if i[0] == j[0]]
@@ -37,6 +38,12 @@ class Table:
 
     def rand(self):
         return random.sample(self._values, 1)[0]
+
+    def weighted_rand(self, other_tbl_freq):
+        weights = np.array([other_tbl_freq[x[0]] for x in self._values])
+        prob_weights = weights / sum(weights)
+        rand_index = np.random.choice(len(self._values), p=prob_weights)
+        return self._values[rand_index]
 
     def join(self, tbl):
         return _full_join(self, tbl)

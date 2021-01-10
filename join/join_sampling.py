@@ -61,6 +61,7 @@ def main():
                  [random.randint(10, 20) for _ in range(20)] + [13 for _ in
                                                                 range(60)])
     tbl2 = Table('tbl2', [random.randint(10, 20) for _ in range(53)])
+    tbl1.weighted_rand(tbl2.freq)
 
     _sample(tbl1, tbl2)
 
