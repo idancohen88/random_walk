@@ -25,6 +25,58 @@ def _sampled_element_is_valid(element, curr_table, sampled_elements, other_table
     return specific_element_sampled < max_sampling_allowed_for_element_from_curr_table
 
 
+def _sampling_like_reservoirs(candidates_appearances, s1_freq):
+    all_sampled_elements = []
+    for key, all_elements in candidates_appearances.items():
+        sample_size = s1_freq[key]
+        sampled_elements_indexes = np.random.choice(len(all_elements), size=sample_size, replace=True)
+        sampled_elements = [all_elements[index] for index in sampled_elements_indexes]
+        all_sampled_elements.extend(sampled_elements)
+
+    return all_sampled_elements
+
+
+def _sample2(tbl1, tbl2, k=50):
+    sampled = []
+
+    sampled_tbl1 = _extract_k_candidate_tbl1(k, tbl1, tbl2)
+    sampled_tbl1_counter = Counter([x[0] for x in sampled_tbl1])
+
+    candidates_appearances_from_tbl2 = _extract_all_candidates_from_tbl2(sampled_tbl1_counter, tbl2)
+    tbl2_sampled = _sampling_like_reservoirs(candidates_appearances_from_tbl2, sampled_tbl1_counter)
+
+    sampled = _match_tupples_for_final_sampling(sampled_tbl1, tbl2_sampled)
+
+    print()
+
+
+def _match_tupples_for_final_sampling(sampled_tbl1, tbl2_sampled):
+    sampled = []
+    for element_tbl1 in sampled_tbl1:
+        element_tbl2 = next(filter(lambda x: x[0] == element_tbl1[0], tbl2_sampled))
+        tbl2_sampled.remove(element_tbl2)
+        sampled.append((element_tbl1, element_tbl2))
+    return sampled
+
+def _reservoirs_sample(element_key, r, n):
+    pass
+
+
+def _extract_all_candidates_from_tbl2(sampled_tbl1_counter, tbl2):
+    many_reservoirs = defaultdict(list)
+    for element in tbl2:
+        element_key = element[0]
+        if not element_key in sampled_tbl1_counter:
+            continue
+
+        #_reservoirs_sample(element_key, r=sampled_tbl1_counter[element_key], n=tbl2.freq[element_key])
+        many_reservoirs[element_key].append(element)
+
+    return many_reservoirs
+
+def _extract_k_candidate_tbl1(k, tbl1, tbl2):
+    return [tbl1.weighted_rand(tbl2.freq) for _ in range(k)]
+
 
 def _sample(tbl1, tbl2, k=50):
     chosen_elements = defaultdict(lambda: {'join_freq': 0, 'sampled': 0, 'sampled_from': [], 'iteration': 0})
@@ -61,9 +113,9 @@ def main():
                  [random.randint(10, 20) for _ in range(20)] + [13 for _ in
                                                                 range(60)])
     tbl2 = Table('tbl2', [random.randint(10, 20) for _ in range(53)])
-    tbl1.weighted_rand(tbl2.freq)
 
-    _sample(tbl1, tbl2)
+
+    _sample2(tbl1, tbl2)
 
 if __name__ == '__main__':
     main()
