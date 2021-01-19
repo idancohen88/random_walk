@@ -21,7 +21,16 @@ class OOBTreeExt(_OOBTree):
         super(OOBTreeExt, self).__init__()
         self.walking_path_to_fanout_distribution = {}
 
+    def _get_height(self):
+        h = 1
+        node = self._data[0].child
+        while not isinstance(node, self._bucket_type):
+            node = node._data[0].child
+            h += 1
+        return h + 1
+
     def random_sampling(self, k, how_to_walk):
+        self.height = self._get_height()
         self.walking_path_to_fanout_distribution = {}
         all_accept_reject_measures = {
             'accept': [],
