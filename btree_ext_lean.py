@@ -1,4 +1,6 @@
 import os
+
+DEFAULT_EXPLORING_STEP = 0
 os.environ["PURE_PYTHON"] = "True"
 
 from BTrees.OOBTree import OOBTree as _OOBTree
@@ -14,6 +16,7 @@ class OOBTreeExtLean(_OOBTree):
     def __init__(self):
         super(OOBTreeExtLean, self).__init__()
         self.walking_path_to_fanout_distribution = {}
+        self.default_exploring_step = DEFAULT_EXPLORING_STEP
 
     def random_sampling(self, k):
         self.walking_path_to_fanout_distribution = {}
@@ -50,6 +53,45 @@ class OOBTreeExtLean(_OOBTree):
 
         return sampled_values
 
+    def _walk_to_determine_prob(self, node, forcing_step):
+        if isinstance(node._data[0].child, self._bucket_type):
+            next_step = self.default_exploring_step
+            fanout = len(node._data)
+            chosen_random_step_prob = 1 / fanout
+            fraction = f"{1}/{fanout}"
+        else:
+            all_sizes = np.array([node.child.size for node in node._data])
+            node_distribution = all_sizes / sum(all_sizes)
+            next_step = forcing_step if forcing_step is not None else self.default_exploring_step
+            fraction = f"{all_sizes[next_step]}/{sum(all_sizes)}"
+            chosen_random_step_prob = node_distribution[next_step]
+
+        return next_step, chosen_random_step_prob, fraction
+
+    def _first_walk_to_determine_structure(self):
+        root = self
+        tree_probs = {}
+        for i in range(len(root._data)):
+            current_node = root
+            prob_to_bucket = 1
+            walking_path_stats = []
+            while not isinstance(current_node, self._bucket_type):
+                force_step = current_node == root
+                next_step, step_prob, fraction = self._walk_to_determine_prob(current_node, forcing_step=i if force_step else None)
+                # assert next_step == 0, 'walking always on 0 just to determine structure'
+                prob_to_bucket *= step_prob
+
+                current_node = current_node._data[next_step].child
+
+                walking_path_stats.append({
+                    'next_random_step': next_step,
+                    'chosen_random_step_prob': step_prob,
+                    'prob_along_path': prob_to_bucket,
+                    'fraction': fraction
+                        })
+            tree_probs[i] = walking_path_stats
+        print(1)
+
     def _get_value_and_path_by_random_walk_from_node(self, node):
         walking_path = []
         current_node = node
@@ -81,19 +123,15 @@ class OOBTreeExtLean(_OOBTree):
 
     def _random_next_move_respect_fanout_prob(self, current_node, walking_path):
         walking_path_str = str(walking_path)
-        is_child_bucket = isinstance(current_node._data[0].child, self._bucket_type)
         if walking_path_str in self.walking_path_to_fanout_distribution:
             node_distribution = self.walking_path_to_fanout_distribution[walking_path_str]
         else:
-            if not is_child_bucket:
-                all_sizes = np.array([node.child.size for node in current_node._data])
-            else:
-                all_sizes = np.array([current_node.max_leaf_size] * len(current_node._data))
+            all_sizes = np.array([node.child.size for node in current_node._data])
             node_distribution = all_sizes / sum(all_sizes)
             self.walking_path_to_fanout_distribution[walking_path_str] = node_distribution
 
         next_random_step = np.random.choice(current_node.size, p=node_distribution)
-        chosen_random_step_prob = node_distribution[next_random_step] if not is_child_bucket else node_distribution[0]
+        chosen_random_step_prob = node_distribution[next_random_step]
         return next_random_step, chosen_random_step_prob
 
 
