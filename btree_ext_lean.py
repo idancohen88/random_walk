@@ -13,6 +13,7 @@ _debug_random_sampling = []
 
 class OOBTreeExtLean(_OOBTree):
     _fanout_distribution_cache = {}
+    _root = None
     _cache_hit_counter = Counter()
 
     def __init__(self):
@@ -60,17 +61,18 @@ class OOBTreeExtLean(_OOBTree):
     def _calc_fanout_distribution_of_node(self, node):
         if node in self._fanout_distribution_cache:
             self._cache_hit_counter['hit'] += 1
-            return self._fanout_distribution_cache[node]
+            return self._fanout_distribution_cache[node].copy()
         self._cache_hit_counter['miss'] += 1
 
         all_sizes = np.array([node.child.size for node in node._data])
         node_distribution = all_sizes / sum(all_sizes)
 
         self._fanout_distribution_cache[node] = node_distribution
-        return node_distribution
+        return node_distribution.copy()
 
     def _first_walk_to_determine_root_coefs(self):
-        branch_coefs = self._determine_root_to_leaf_walking_probs(root=self)
+        self._root = self
+        branch_coefs = self._determine_root_to_leaf_walking_probs()
         equations_matrix, equations_equal_matrix = self._create_equations_for_equaling_all_walking_probs(branch_coefs)
 
         self.root_probs_coefs = np.linalg.solve(equations_matrix, equations_equal_matrix)
@@ -91,12 +93,13 @@ class OOBTreeExtLean(_OOBTree):
         equations_equal_matrix[-1] = 1
         return equations_matrix, equations_equal_matrix
 
-    def _determine_root_to_leaf_walking_probs(self, root):
+    def _determine_root_to_leaf_walking_probs(self):
+        assert self._root, 'must keep _root aside before working with this method'
         root_to_leaf_walking_probs = {}
-        root_fanout_distribution = self._calc_fanout_distribution_of_node(root)
+        root_fanout_distribution = self._calc_fanout_distribution_of_node(self._root)
 
-        for root_child_number in range(len(root._data)):
-            current_node = root
+        for root_child_number in range(len(self._root._data)):
+            current_node = self._root
             walking_prob = root_fanout_distribution[root_child_number]
             current_node = current_node._data[root_child_number].child
 
@@ -118,12 +121,9 @@ class OOBTreeExtLean(_OOBTree):
         prob_along_path = 1
         walking_path_stats = []
         while not isinstance(current_node, self._bucket_type):
-            root = not walking_path_stats
-            if root:
-                next_random_step, chosen_random_step_prob = self._random_next_move_respect_fanout_prob_from_root(
-                    current_node, walking_path)
-            else:
-                next_random_step, chosen_random_step_prob = self._random_next_move_respect_fanout_prob(current_node, walking_path)
+            next_random_step, chosen_random_step_prob = self._random_next_move_respect_fanout_prob(
+                current_node, walking_path)
+
             prob_along_path *= chosen_random_step_prob
             walking_path.append((next_random_step, current_node.size, chosen_random_step_prob, prob_along_path))
             current_node = current_node._data[next_random_step].child
@@ -145,37 +145,36 @@ class OOBTreeExtLean(_OOBTree):
         leaf = current_node._keys
         return leaf[next_random_step], walking_path, walking_path_stats
 
+    def _is_root_node(self, node):
+        assert self._root
+        return node == self._root
 
     def _random_next_move_respect_fanout_prob(self, current_node, walking_path):
-        walking_path_str = str(walking_path)
-        if walking_path_str in self.walking_path_to_fanout_distribution:
-            node_distribution = self.walking_path_to_fanout_distribution[walking_path_str]
-        else:
-            all_sizes = np.array([node.child.size for node in current_node._data])
-            node_distribution = all_sizes / sum(all_sizes)
-            self.walking_path_to_fanout_distribution[walking_path_str] = node_distribution
-
-        next_random_step = np.random.choice(current_node.size, p=node_distribution)
-        chosen_random_step_prob = node_distribution[next_random_step]
-        return next_random_step, chosen_random_step_prob
-
-    def _random_next_move_respect_fanout_prob_from_root(self, current_node, walking_path):
-        walking_path_str = str(walking_path)
-        if walking_path_str in self.walking_path_to_fanout_distribution:
-            node_distribution = self.walking_path_to_fanout_distribution[walking_path_str]
-        else:
-            all_sizes = np.array([node.child.size for node in current_node._data])
-            node_distribution = np.array(all_sizes / sum(all_sizes))
+        node_distribution = self._calc_fanout_distribution_of_node(current_node)
+        if self._is_root_node(current_node):
             node_distribution *= self.root_probs_coefs
-            #node_distribution = node_distribution / sum(node_distribution)
-            self.walking_path_to_fanout_distribution[walking_path_str] = node_distribution
+            node_distribution = _fix_distribution_mistake_due_to_floating_calc_errors_if_needed(node_distribution)
+
         next_random_step = np.random.choice(current_node.size, p=node_distribution)
+
         chosen_random_step_prob = node_distribution[next_random_step]
         return next_random_step, chosen_random_step_prob
 
 
     def join(self, right_tree):
         pass
+
+
+def _fix_distribution_mistake_due_to_floating_calc_errors_if_needed(node_distribution):
+    # todo: as it happens only at the root, can fix the coefs
+    if sum(node_distribution) == 1:
+        return node_distribution
+
+    calc_error = 1 - sum(node_distribution)
+    assert calc_error <= 0.0_000_001, 'calculation faults cant be higher than this'
+    random_child = np.random.randint(len(node_distribution))
+    node_distribution[random_child] += calc_error
+    return node_distribution
 
 
 def add_to_debug_global(all_vars):
