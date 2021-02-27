@@ -12,6 +12,7 @@ _debug_random_sampling = []
 class WALKING_TECHNIQUE:
     RANDOM = 'random'
     RANDOM_WITH_TEST = 'random_with_test'
+    RANDOM_WITH_TEST_EARLY_ABORT = 'random_with_test_early_abort'
     DISTRIBUTION_ORIENTED = 'distribution_oriented'
 
 
@@ -46,6 +47,16 @@ class OOBTreeExt(_OOBTree):
                 self._get_value_and_path_by_random_walk_from_node(node=self,
                     how_to_walk=how_to_walk)
 
+            if how_to_walk == WALKING_TECHNIQUE.RANDOM_WITH_TEST_EARLY_ABORT and sampled_value is None:
+                accept_reject_measures = {
+                    'path': walking_path,
+                    'value': sampled_value,
+                    'acceptance_prob': acc_rej_test_acceptance_prob
+                }
+                all_accept_reject_measures['reject'].append(accept_reject_measures)
+                continue
+
+
             if _this_value_was_sampled_already(walking_path, all_walking_paths_set):
                 all_accept_reject_measures['revisited_paths'][str(walking_path)] += 1
                 continue
@@ -77,7 +88,7 @@ class OOBTreeExt(_OOBTree):
         acc_rej_test_max_fan_out = None
 
         while not isinstance(current_node, self._bucket_type):
-            if how_to_walk == WALKING_TECHNIQUE.RANDOM_WITH_TEST:
+            if how_to_walk in (WALKING_TECHNIQUE.RANDOM_WITH_TEST, WALKING_TECHNIQUE.RANDOM_WITH_TEST_EARLY_ABORT):
                 acc_rej_test_max_fan_out = self.max_internal_size
                 next_random_step = np.random.randint(low=0, high=current_node.size)
             elif how_to_walk == WALKING_TECHNIQUE.DISTRIBUTION_ORIENTED:
@@ -90,6 +101,11 @@ class OOBTreeExt(_OOBTree):
 
             if how_to_walk == WALKING_TECHNIQUE.RANDOM_WITH_TEST:
                 acc_rej_test_acceptance_prob *= (current_node.size / acc_rej_test_max_fan_out)
+            if how_to_walk == WALKING_TECHNIQUE.RANDOM_WITH_TEST_EARLY_ABORT:
+                should_continue = _accept_reject_test_pass((current_node.size / acc_rej_test_max_fan_out))
+                if not should_continue:
+                    return None, walking_path, None
+
 
             walking_path.append((next_random_step, current_node.size, acc_rej_test_max_fan_out))
 
