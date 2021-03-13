@@ -24,10 +24,8 @@ def insert_to_index_random(my_index, amount, prefix=''):
         alphabet = list(ALPHABET)
         np_alphabet = np.array(alphabet)
         np_codes = np.random.choice(np_alphabet, [amount_in_iteration, KEY_LENGTH])
-        my_index.update({
-            prefix + ''.join(np_codes[i]): "".join(np_codes[i])
-            for i in range(len(np_codes))
-        })
+        data_to_insert = {prefix + ''.join(np_codes[i]): "".join(np_codes[i]) for i in range(len(np_codes))}
+        my_index.update(data_to_insert)
 
         proceed += amount_in_iteration
         if (proceed % 150000) == 0:
