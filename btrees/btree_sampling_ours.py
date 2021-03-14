@@ -1,14 +1,17 @@
+import os
+os.environ["PURE_PYTHON"] = "True"
 from BTrees.OOBTree import OOBTree as _OOBTree
 import numpy as np
 
+DEFAULT_EXPLORING_STEP = 0
 
 class OOBTreeExtOur(_OOBTree):
     def __init__(self):
         super(OOBTreeExtOur, self).__init__()
-        self.walking_path_to_fanout_distribution = {}
+        self._fanout_distribution_cache = {}
 
     def sample_distribution_height_three(self, k):
-        self.walking_path_to_fanout_distribution = {}
+        self._fanout_distribution_cache = {}
         sampled_values = []
         sampled_paths = []
 
@@ -27,9 +30,7 @@ class OOBTreeExtOur(_OOBTree):
         walking_path = []
 
         while not isinstance(current_node, self._bucket_type):
-            next_random_step = self._random_next_move_respect_fanout_prob(
-                current_node, walking_path
-            )
+            next_random_step = self._random_next_move_respect_fanout_prob(current_node)
             current_node = current_node._data[next_random_step].child
 
             walking_path.append(next_random_step)
@@ -38,16 +39,22 @@ class OOBTreeExtOur(_OOBTree):
         walking_path.append(next_random_step)
         return value_in_leaf, walking_path
 
-    def _random_next_move_respect_fanout_prob(self, current_node, walking_path):
-        walking_path_str = str(walking_path)
-        if walking_path_str in self.walking_path_to_fanout_distribution:
-            node_distribution = self.walking_path_to_fanout_distribution[walking_path_str]
-        else:
-            all_sizes = np.array([node.child.size for node in current_node._data])
-            node_distribution = all_sizes / sum(all_sizes)
-            self.walking_path_to_fanout_distribution[walking_path_str] = node_distribution
+    def _random_next_move_respect_fanout_prob(self, current_node):
+        node_distribution = self._calc_fanout_distribution_of_node(current_node)
 
         return np.random.choice(current_node.size, p=node_distribution)
 
     def sample_distribution_height_4(self, k):
         pass
+
+    def _calc_fanout_distribution_of_node(self, node):
+        if node in self._fanout_distribution_cache:
+            self._cache_hit_counter['hit'] += 1
+            return self._fanout_distribution_cache[node].copy()
+        self._cache_hit_counter['miss'] += 1
+
+        all_sizes = np.array([node.child.size for node in node._data])
+        node_distribution = all_sizes / sum(all_sizes)
+
+        self._fanout_distribution_cache[node] = node_distribution
+        return node_distribution.copy()
