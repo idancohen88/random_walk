@@ -4,7 +4,7 @@ from build_tree.build_tree import ALPHABET
 
 os.environ["PURE_PYTHON"] = "True"
 
-from btrees.btee_ext_new import OOBTreeExt
+from btrees.btee_ext import OOBTreeExt
 
 MAX_INTERNAL_SIZE = 4
 MAX_LEAF_SIZE = 4
