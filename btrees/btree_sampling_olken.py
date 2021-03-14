@@ -6,7 +6,7 @@ import numpy as np
 class OOBTreeExtOlken(_OOBTree):
     def sample_olken_early_abort(self, k):
         sampled_values = []
-        sampled_path = []
+        sampled_paths = []
         reject_counter = 0
         while len(sampled_values) < k:
             value, path = self._olken_walk_toward_bucket_early_abort(node=self)
@@ -14,11 +14,11 @@ class OOBTreeExtOlken(_OOBTree):
             if value is None:
                 reject_counter += 1
 
-            if path in sampled_path:
+            if path in sampled_paths:
                 continue  # todo: revisited
 
             sampled_values.append(value)
-            sampled_path.append(path)
+            sampled_paths.append(path)
 
         self._persist_sampling_stats()
 
@@ -77,9 +77,8 @@ class OOBTreeExtOlken(_OOBTree):
 
             walking_path.append(next_random_step)
 
-        next_random_step = np.random.randint(low=0, high=current_node.size)
 
-        value_in_leaf = current_node.items()[next_random_step]
+        next_random_step, value_in_leaf = self._get_random_step_and_value_from_bucket(bucket=current_node)
         walking_path.append(next_random_step)
         return value_in_leaf, walking_path
 

@@ -10,12 +10,22 @@ MAX_INTERNAL_SIZE = 4
 MAX_LEAF_SIZE = 4
 
 def test_oklen_sanity():
+    sample_size = 3
     my_index = _generate_3_height_btree()
-    assert len(my_index.sample_olken(3)) == 3
+    assert len(my_index.sample_olken(sample_size)) == sample_size
+
+
+def test_ours_height_three_sanity():
+    sample_size = 3
+    my_index = _generate_3_height_btree()
+    assert len(my_index.sample_distribution_height_three(sample_size)) == sample_size
+
+
 
 def test_oklen__early_abort_sanity():
+    sample_size = 3
     my_index = _generate_3_height_btree()
-    assert len(my_index.sample_olken_early_abort(3)) == 3
+    assert len(my_index.sample_olken_early_abort(sample_size)) == sample_size
 
 
 def _generate_3_height_btree():
@@ -35,3 +45,4 @@ def _generate_3_height_btree():
 if __name__ == '__main__':
     test_oklen_sanity()
     test_oklen__early_abort_sanity()
+    test_ours_height_three_sanity()
