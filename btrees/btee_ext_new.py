@@ -2,10 +2,10 @@ from BTrees.OOBTree import OOBTree as _OOBTree
 import numpy as np
 
 from btrees.btree_sampling_olken import OOBTreeExtOlken
-from btrees.btree_sampling_ours import OOBTreeExtOur
+from btrees.btree_sampling_ours import OOBTreeExtFanoutOriented
 
 
-class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtOur):
+class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
 
     def _persist_sampling_stats(self):
         pass
