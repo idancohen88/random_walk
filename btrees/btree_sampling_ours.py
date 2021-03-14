@@ -26,6 +26,7 @@ class OOBTreeExtFanoutOriented(_OOBTree):
             sampled_paths.append(path)
             sampled_values.append(value)
 
+        self._persist_sampling_stats()
         return sampled_values
 
     def _fanout_oriented_random_walk_node_to_item(self, node):
@@ -66,6 +67,7 @@ class OOBTreeExtFanoutOriented(_OOBTree):
             sampled_values.append(value)
             sampled_paths.append(path)
 
+        self._persist_sampling_stats()
         return sampled_values
 
 
