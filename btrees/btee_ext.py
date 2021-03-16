@@ -1,7 +1,7 @@
 import numpy as np
 
 from btrees.btree_sampling_olken import OOBTreeExtOlken
-from btrees.btree_sampling_ours import OOBTreeExtFanoutOriented
+from btrees.btree_sampling_distribution_oriented import OOBTreeExtFanoutOriented
 
 
 class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
