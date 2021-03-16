@@ -13,7 +13,7 @@ class OOBTreeExtFanoutOriented(_OOBTree):
         self._fanout_distribution_cache = {}
         self._cache_hit_counter = Counter()
 
-    def sample_distribution_height_three(self, k):
+    def sample_distribution_oriented_height_three(self, k):
         self._fanout_distribution_cache = {}
         sampled_values = []
         sampled_paths = []
@@ -47,7 +47,7 @@ class OOBTreeExtFanoutOriented(_OOBTree):
 
         return np.random.choice(current_node.size, p=node_distribution)
 
-    def sample_distribution_height_four(self, k):
+    def sample_distribution_oriented_height_four(self, k):
         self._fanout_distribution_cache = {}
         root = self
         root_probs_coefs = self._first_walk_to_determine_root_coefs() # todo:

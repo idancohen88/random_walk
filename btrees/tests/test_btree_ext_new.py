@@ -1,8 +1,8 @@
 import os
 
+os.environ["PURE_PYTHON"] = "True"
 from build_tree.build_tree import ALPHABET
 
-os.environ["PURE_PYTHON"] = "True"
 
 from btrees.btee_ext import OOBTreeExt
 
@@ -19,7 +19,7 @@ def test_oklen_sanity():
 def test_ours_height_three_sanity():
     sample_size = 3
     my_index = _generate_3_height_btree()
-    assert len(my_index.sample_distribution_height_three(sample_size)) == sample_size
+    assert len(my_index.sample_distribution_oriented_height_three(sample_size)) == sample_size
 
 
 def test_oklen__early_abort_sanity():
@@ -59,7 +59,7 @@ def _generate_4_height_btree():
 def test_sample_distribution_height_four():
     sample_size = 3
     my_index = _generate_4_height_btree()
-    assert len(my_index.sample_distribution_height_four(sample_size)) == sample_size
+    assert len(my_index.sample_distribution_oriented_height_four(sample_size)) == sample_size
 
 
 def test_ours_height_four__walk_to_determine_root_coefs():

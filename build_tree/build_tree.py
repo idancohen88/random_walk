@@ -1,6 +1,6 @@
 import numpy as np
 
-from btrees.btree_ext_deprecated import OOBTreeExt
+from btrees.btee_ext import OOBTreeExt
 
 CHUNKS_SIZE = 10000
 KEY_LENGTH = 8
