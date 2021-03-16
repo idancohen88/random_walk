@@ -1,9 +1,8 @@
-from BTrees.OOBTree import OOBTree as _OOBTree
 import numpy as np
+from BTrees.OOBTree import OOBTreePy
 
 
-
-class OOBTreeExtOlken(_OOBTree):
+class OOBTreeExtOlken(OOBTreePy):
     def sample_olken_early_abort(self, k):
         sampled_values = []
         sampled_paths = []

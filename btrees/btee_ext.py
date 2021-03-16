@@ -1,4 +1,3 @@
-from BTrees.OOBTree import OOBTree as _OOBTree
 import numpy as np
 
 from btrees.btree_sampling_olken import OOBTreeExtOlken

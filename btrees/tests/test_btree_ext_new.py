@@ -1,6 +1,3 @@
-import os
-
-os.environ["PURE_PYTHON"] = "True"
 from build_tree.build_tree import ALPHABET
 
 

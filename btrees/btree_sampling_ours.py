@@ -1,13 +1,11 @@
-import os
 from collections import Counter
 
-os.environ["PURE_PYTHON"] = "True"
-from BTrees.OOBTree import OOBTree as _OOBTree
+from BTrees.OOBTree import OOBTreePy
 import numpy as np
 
 DEFAULT_EXPLORING_STEP = 0
 
-class OOBTreeExtFanoutOriented(_OOBTree):
+class OOBTreeExtFanoutOriented(OOBTreePy):
     def __init__(self):
         super(OOBTreeExtFanoutOriented, self).__init__()
         self._fanout_distribution_cache = {}
