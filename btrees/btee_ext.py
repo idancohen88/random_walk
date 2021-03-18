@@ -19,4 +19,3 @@ def _accept_reject_test_pass(acceptance_prob):
     rand_num = np.random.random_sample()
     return rand_num < acceptance_prob
 
-
