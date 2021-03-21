@@ -30,7 +30,7 @@ def test_ours_height_three_sanity():
     )
 
 
-def test_oklen__early_abort_sanity():
+def test_olken__early_abort_sanity():
     sample_size = 3
     my_index = _generate_3_height_btree()
     assert len(my_index.sample_olken_early_abort(sample_size)) == sample_size
@@ -116,18 +116,21 @@ def test_persisting_stats():
     assert len(csv) == 2
     expected_columns = {
         "sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size"}
+        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size", "btree_height"}
     assert set(csv.columns) == expected_columns
 
-
+def test_get_height():
+    my_index = _generate_4_height_btree()
+    assert my_index._get_height() == 4
 
 if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_get_height()
     test_btree_generation__custom_leaf_size()
     test_oklen_sanity()
-    test_oklen__early_abort_sanity()
+    test_olken__early_abort_sanity()
     test_ours_height_three_sanity()
     test_ours_height_four__walk_to_determine_root_coefs()
     test_sample_distribution_height_four()
