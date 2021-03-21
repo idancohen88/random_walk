@@ -18,6 +18,16 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
         super(OOBTreeExt).__init__()
         self._np_samples = None
         self._btree_size = None
+        self._real_max_leaf_size = self._get_max_leaf_size_at_init()
+        self._real_max_internal_size = self._get_max_internal_size_at_init()
+
+    def _get_max_leaf_size_at_init(self):
+        # saving the value, even if it's mocked
+        return self.max_leaf_size
+
+    def _get_max_internal_size_at_init(self):
+        # saving the value, even if it's mocked
+        return self.max_internal_size
 
     def _persist_sampling_stats(self, **kwargs):
         end_time = datetime.now()
@@ -47,6 +57,9 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
             ks_stats=ks_stats,
             p_value=p_value,
             sampled_values_counter=sampled_values_counter,
+            max_leaf_size=self._real_max_leaf_size,
+            max_internal_size=self._real_max_internal_size,
+            btree_size=self._btree_size
         )
         return sampled_csv
 

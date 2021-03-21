@@ -59,7 +59,7 @@ def insert_to_index_random(my_index, amount, prefix=""):
         np_alphabet = np.array(alphabet)
         np_codes = np.random.choice(np_alphabet, [amount_in_iteration, KEY_LENGTH])
         data_to_insert = {
-            prefix + "".join(np_codes[i]): "".join(np_codes[i])
+            prefix + "".join(np_codes[i]): prefix
             for i in range(len(np_codes))
         }
         my_index.update(data_to_insert)

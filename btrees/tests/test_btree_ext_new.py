@@ -116,7 +116,7 @@ def test_persisting_stats():
     assert len(csv) == 2
     expected_columns = {
         "sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "reject_counter",}
+        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size"}
     assert set(csv.columns) == expected_columns
 
 
