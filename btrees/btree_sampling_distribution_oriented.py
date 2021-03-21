@@ -1,4 +1,5 @@
 from collections import Counter
+from datetime import datetime
 
 from BTrees.OOBTree import OOBTreePy
 import numpy as np
@@ -12,7 +13,9 @@ class OOBTreeExtFanoutOriented(OOBTreePy):
         self._cache_hit_counter = Counter()
 
     def sample_distribution_oriented_height_three(self, k):
+        start_time = datetime.now()
         self._fanout_distribution_cache = {}
+        self._cache_hit_counter = Counter()
         sampled_values = []
         sampled_paths = []
 
@@ -24,7 +27,8 @@ class OOBTreeExtFanoutOriented(OOBTreePy):
             sampled_paths.append(path)
             sampled_values.append(value)
 
-        self._persist_sampling_stats()
+        self._persist_sampling_stats(start_time=start_time,sampled_values=sampled_values,
+                                     name='distribution_oriented_height_three', sample_size=k)
         return sampled_values
 
     def _fanout_oriented_random_walk_node_to_item(self, node):
@@ -46,7 +50,9 @@ class OOBTreeExtFanoutOriented(OOBTreePy):
         return np.random.choice(current_node.size, p=node_distribution)
 
     def sample_distribution_oriented_height_four(self, k):
+        start_time = datetime.now()
         self._fanout_distribution_cache = {}
+        self._cache_hit_counter = Counter()
         root = self
         root_probs_coefs = self._first_walk_to_determine_root_coefs() # todo:
         sampled_values = []
@@ -65,9 +71,9 @@ class OOBTreeExtFanoutOriented(OOBTreePy):
             sampled_values.append(value)
             sampled_paths.append(path)
 
-        self._persist_sampling_stats()
+        self._persist_sampling_stats(start_time=start_time, sampled_values=sampled_values,
+                                     name='distribution_oriented_height_four', sample_size=k)
         return sampled_values
-
 
     def _first_walk_to_determine_root_coefs(self):
         branch_coefs = self._determine_root_to_leaf_walking_probs(root=self)

@@ -1,9 +1,12 @@
+from datetime import datetime
+
 import numpy as np
 from BTrees.OOBTree import OOBTreePy
 
 
 class OOBTreeExtOlken(OOBTreePy):
     def sample_olken_early_abort(self, k):
+        start_time = datetime.now()
         sampled_values = []
         sampled_paths = []
         reject_counter = 0
@@ -12,6 +15,7 @@ class OOBTreeExtOlken(OOBTreePy):
 
             if value is None:
                 reject_counter += 1
+                continue
 
             if path in sampled_paths:
                 continue  # todo: revisited
@@ -19,11 +23,13 @@ class OOBTreeExtOlken(OOBTreePy):
             sampled_values.append(value)
             sampled_paths.append(path)
 
-        self._persist_sampling_stats()
+        self._persist_sampling_stats(reject_counter=reject_counter, start_time=start_time, sampled_values=sampled_values,
+                                     name='olken_early_abort', sample_size=k)
 
         return sampled_values
 
     def sample_olken(self, k):
+        start_time = datetime.now()
         sampled_values = []
         sampled_path = []
         reject_counter = 0
@@ -40,8 +46,8 @@ class OOBTreeExtOlken(OOBTreePy):
 
             reject_counter += 1
 
-        self._persist_sampling_stats()
-
+        self._persist_sampling_stats(reject_counter=reject_counter, start_time=start_time, sampled_values=sampled_values,
+                                     name='olken', sample_size=k)
         return sampled_values
 
     def _olken_walk_toward_bucket(self, node):
