@@ -1,5 +1,6 @@
 import os
 from contextlib import contextmanager
+from itertools import zip_longest
 from unittest.mock import patch
 
 from BTrees import OOBTree
@@ -47,7 +48,7 @@ def _generate_3_height_btree():
         my_index = OOBTreeExt()
         my_index.has_key("a")
         for i, c in enumerate(ALPHABET):
-            my_index[c] = i
+            my_index[i] = c
 
     assert isinstance(
         my_index._data[0].child._data[0].child, my_index._bucket_type
@@ -116,17 +117,38 @@ def test_persisting_stats():
     assert len(csv) == 2
     expected_columns = {
         "sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size", "btree_height"}
+        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size", "btree_height", "distinct_values_error"}
     assert set(csv.columns) == expected_columns
 
 def test_get_height():
     my_index = _generate_4_height_btree()
     assert my_index._get_height() == 4
 
+
+def test_distinct_values_estimator():
+    my_index = _generate_3_height_btree()
+    my_index.update({key:value for key, value in enumerate(list(iter('aaabbbccddddd')) * 20, 100)})
+    # continue from here, check alg validation
+    sample_size = 30
+    sampled_tuples = my_index.sample_distribution_oriented_height_four(sample_size)
+    sampled_values = [x[1] for x in sampled_tuples]
+    distinct_values_metric = my_index._distinct_values_error_metric(sampled_values, sample_size)
+    assert distinct_values_metric > 0
+
+    distinct_values_metric_on_entire_data = my_index._distinct_values_error_metric(my_index.values(), sample_size)
+    assert distinct_values_metric > distinct_values_metric_on_entire_data
+
+def test_run_all_samples__sanity():
+    my_index = _generate_4_height_btree()
+    my_index.run_all_samples(1,1)
+
+
 if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_distinct_values_estimator()
+    test_run_all_samples__sanity()
     test_get_height()
     test_btree_generation__custom_leaf_size()
     test_oklen_sanity()

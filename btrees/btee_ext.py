@@ -1,6 +1,10 @@
 import os
 from collections import Counter
 from datetime import datetime
+from itertools import groupby
+from math import sqrt
+from operator import itemgetter
+
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -21,12 +25,18 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
         self._real_max_leaf_size = self._get_max_leaf_size_at_init()
         self._real_max_internal_size = self._get_max_internal_size_at_init()
         self._btree_height = None
+        self._num_distinct_values = None
 
-    def run_all_samples(self, k):
-        self.sample_distribution_oriented_height_four(k)
-        self.sample_distribution_oriented_height_three(k)
-        self.sample_olken(k)
-        self.sample_olken_early_abort(k)
+    def run_all_samples(self, k, iterations=1):
+        if isinstance(k, int):
+            k=[k]
+
+        for sample_size in k:
+            for i in range(iterations):
+                self.sample_distribution_oriented_height_four(sample_size)
+                self.sample_distribution_oriented_height_three(sample_size)
+                self.sample_olken(sample_size)
+                self.sample_olken_early_abort(sample_size)
 
     def _get_max_leaf_size_at_init(self):
         # saving the value, even if it's mocked
@@ -55,6 +65,8 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
             STATS_TOP_X_TO_SHOW
         )
 
+        distinct_values_error_metric = self._distinct_values_error_metric(sampled_values, sample_size)
+
         sampled_csv = self._append_to_df(
             name=name,
             start_time=start_time,
@@ -67,7 +79,8 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
             max_leaf_size=self._real_max_leaf_size,
             max_internal_size=self._real_max_internal_size,
             btree_size=self._btree_size,
-            btree_height=self._btree_height or self._get_height()
+            btree_height=self._btree_height or self._get_height(),
+            distinct_values_error=distinct_values_error_metric,
         )
         return sampled_csv
 
@@ -96,6 +109,33 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
             node = node._data[0].child
             h += 1
         return h + 1
+
+    def _distinct_values_error_metric(self, sampled_values, sample_size):
+        if not sampled_values:
+            return 0
+
+        distinct_values_estimator = self._distinct_values_estimator(sample_size, sampled_values)
+        self._num_distinct_values = self._num_distinct_values  or len(set(self.values()))
+        rel_error = (self._num_distinct_values - distinct_values_estimator) / self._btree_size
+
+        return rel_error
+
+    def _distinct_values_estimator(self, sample_size, sampled_values):
+        self._btree_size = self._btree_size or len(self.values())
+        count_values = Counter(sampled_values)
+        count_values_ordered = sorted(count_values.items(), key=itemgetter(1))
+        group_size_to_number_of_groups = {}
+        for _, group in groupby(count_values_ordered, itemgetter(1)):
+            group = list(group)
+            groups_of_size = group[0][1]
+            number_of_groups = len(group)
+            group_size_to_number_of_groups[groups_of_size] = number_of_groups
+        f1 = group_size_to_number_of_groups.get(1, 1)
+        group_size_to_number_of_groups.pop(1, None)
+        all_other_f_sums = sum(group_size_to_number_of_groups.values())
+        estimator = sqrt(self._btree_size / sample_size) * f1 + all_other_f_sums
+        return estimator
+
 
 def _accept_reject_test_pass(acceptance_prob):
     rand_num = np.random.random_sample()
