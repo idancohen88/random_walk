@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import numpy as np
-from btrees.btee_base import OOBTreeBase
+from btrees.btree_base import OOBTreeBase
 
 
 class OOBTreeExtOlken(OOBTreeBase):

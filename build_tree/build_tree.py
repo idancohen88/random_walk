@@ -5,7 +5,7 @@ from unittest.mock import patch
 import numpy as np
 from BTrees.OOBTree import OOBTreePy
 
-from btrees.btee_ext import OOBTreeExt
+from btrees.btree_ext import OOBTreeExt
 
 CHUNKS_SIZE = 10000
 KEY_LENGTH = 8

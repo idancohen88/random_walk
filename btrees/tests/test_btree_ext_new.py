@@ -10,7 +10,7 @@ from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist
 from BTrees.OOBTree import OOBTreePy
 
-from btrees.btee_ext import OOBTreeExt
+from btrees.btree_ext import OOBTreeExt
 from btrees.common import SAMPLING_TESTS_CSV
 
 MAX_INTERNAL_SIZE = 5
