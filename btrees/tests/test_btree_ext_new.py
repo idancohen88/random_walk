@@ -7,7 +7,7 @@ from BTrees import OOBTree
 
 import pandas as pd
 from build_tree import build_tree
-from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size
+from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist
 from BTrees.OOBTree import OOBTreePy
 
 from btrees.btee_ext import OOBTreeExt, SAMPLING_TESTS_CSV
@@ -115,9 +115,9 @@ def test_persisting_stats():
 
     csv = pd.read_csv(SAMPLING_TESTS_CSV)
     assert len(csv) == 2
-    expected_columns = {
-        "sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size", "btree_height", "distinct_values_error"}
+    expected_columns = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
+        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size"}
     assert set(csv.columns) == expected_columns
 
 def test_get_height():
@@ -142,11 +142,17 @@ def test_run_all_samples__sanity():
     my_index = _generate_4_height_btree()
     my_index.run_all_samples(1,1)
 
+def test_generate_zipf_dist__sanity():
+    my_index_uniform = generate_zipf_dist(num_of_values=50, max_value=50, skew_factor=0)
+    my_index_skewed = generate_zipf_dist(num_of_values=50, max_value=50, skew_factor=0.9)
+    assert set(my_index_uniform.values()) > set(my_index_skewed.values())
+
 
 if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_generate_zipf_dist__sanity()
     test_distinct_values_estimator()
     test_run_all_samples__sanity()
     test_get_height()

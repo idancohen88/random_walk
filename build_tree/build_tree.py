@@ -22,6 +22,7 @@ def generate_btree_index_x_values_with_dist(
         my_index = insert_to_index_random(my_index, amount, prefix)
 
     print("finish at %s" % datetime.now())
+    my_index.set_data_generation_method('clusters')
     return my_index
 
 
@@ -79,3 +80,26 @@ def overriding_btree_max_leaf_size(max_leaf_size):
     finally:
         print('warning!!! mocking max_leaf_size has over!!')
 
+
+def _freqs_to_data(freqs):
+    return [x for num, freq in freqs.items() for x in [num] * round(freq)]
+
+
+def generate_zipf_dist(num_of_values, max_value, skew_factor=0):
+    print("start time %s" % datetime.now())
+    relation_size = num_of_values
+    domain_size = max_value
+    z = skew_factor
+    freqs = {}
+    for i in range(1, domain_size+1):
+        freqs[i] = relation_size * (1/i**z) / sum(1/inner_i**z for inner_i in range(1,domain_size+1))
+
+    data = _freqs_to_data(freqs)
+
+    my_index = OOBTreeExt()
+    my_index.update(dict(zip(range(len(data)), data)))
+    my_index.set_skew_factor(skew_factor)
+    my_index.set_data_generation_method('zipf')
+    my_index.set_domain_size(domain_size)
+    print("finish at %s" % datetime.now())
+    return my_index

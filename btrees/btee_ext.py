@@ -26,6 +26,10 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
         self._real_max_internal_size = self._get_max_internal_size_at_init()
         self._btree_height = None
         self._num_distinct_values = None
+        self._skew_factor = None
+        self._domain_size = None
+
+
 
     def run_all_samples(self, k, iterations=1):
         if isinstance(k, int):
@@ -81,6 +85,8 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
             btree_size=self._btree_size,
             btree_height=self._btree_height or self._get_height(),
             distinct_values_error=distinct_values_error_metric,
+            skew_factor=self._skew_factor,
+            domain_size=self._domain_size
         )
         return sampled_csv
 
@@ -136,6 +142,14 @@ class OOBTreeExt(OOBTreeExtOlken, OOBTreeExtFanoutOriented):
         estimator = sqrt(self._btree_size / sample_size) * f1 + all_other_f_sums
         return estimator
 
+    def set_skew_factor(self, skew_factor):
+        self._skew_factor = skew_factor
+
+    def set_data_generation_method(self, method):
+        self._method = method
+
+    def set_domain_size(self, domain_size):
+        self._domain_size = domain_size
 
 def _accept_reject_test_pass(acceptance_prob):
     rand_num = np.random.random_sample()
