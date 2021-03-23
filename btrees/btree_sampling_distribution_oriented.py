@@ -1,12 +1,12 @@
 from collections import Counter
 from datetime import datetime
-
-from BTrees.OOBTree import OOBTreePy
 import numpy as np
+
+from btrees.btee_base import OOBTreeBase
 
 DEFAULT_EXPLORING_STEP = 0
 
-class OOBTreeExtFanoutOriented(OOBTreePy):
+class OOBTreeExtFanoutOriented(OOBTreeBase):
     def __init__(self):
         super(OOBTreeExtFanoutOriented, self).__init__()
         self._fanout_distribution_cache = {}

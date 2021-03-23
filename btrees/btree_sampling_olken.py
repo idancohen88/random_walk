@@ -1,10 +1,10 @@
 from datetime import datetime
 
 import numpy as np
-from BTrees.OOBTree import OOBTreePy
+from btrees.btee_base import OOBTreeBase
 
 
-class OOBTreeExtOlken(OOBTreePy):
+class OOBTreeExtOlken(OOBTreeBase):
     def sample_olken_early_abort(self, k):
         start_time = datetime.now()
         sampled_values = []

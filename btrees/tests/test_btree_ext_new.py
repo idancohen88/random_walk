@@ -10,7 +10,8 @@ from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist
 from BTrees.OOBTree import OOBTreePy
 
-from btrees.btee_ext import OOBTreeExt, SAMPLING_TESTS_CSV
+from btrees.btee_ext import OOBTreeExt
+from btrees.common import SAMPLING_TESTS_CSV
 
 MAX_INTERNAL_SIZE = 5
 MAX_LEAF_SIZE = 5
@@ -97,10 +98,6 @@ def test_sample_distribution_height_four():
 
 def test_ours_height_four__walk_to_determine_root_coefs():
     my_index = _generate_4_height_btree()
-    my_index._fanout_distribution_cache = {}  # todo: change!!
-    from collections import Counter
-
-    my_index._cache_hit_counter = Counter()  # todo: change!!
     coef = my_index._first_walk_to_determine_root_coefs()
 
     assert sum(coef) == 1
