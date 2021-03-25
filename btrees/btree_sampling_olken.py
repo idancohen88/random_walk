@@ -90,7 +90,6 @@ class OOBTreeExtOlken(OOBTreeBase):
     def _early_abort_should_continue(self, node):
         return _accept_reject_test_pass((node.size / self.max_internal_size))
 
-
 def _accept_reject_test_pass(acceptance_prob):
     rand_num = np.random.random_sample()
     return rand_num < acceptance_prob

@@ -85,6 +85,8 @@ class OOBTreeBase(OOBTreePy):
             skew_factor=self._skew_factor,
             domain_size=self._domain_size
         )
+
+        self._clean_counters()
         return sampled_csv
 
     def _append_to_df(self, **kwargs):
@@ -147,6 +149,10 @@ class OOBTreeBase(OOBTreePy):
 
     def set_domain_size(self, domain_size):
         self._domain_size = domain_size
+
+    def _clean_counters(self):
+        self._fanout_distribution_cache = {}
+        self._cache_hit_counter = Counter()
 
 
 def _accept_reject_test_pass(acceptance_prob):
