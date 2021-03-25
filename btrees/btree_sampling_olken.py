@@ -60,8 +60,8 @@ class OOBTreeExtOlken(OOBTreeBase):
             next_random_step = np.random.randint(low=0, high=current_node.size)
             current_node = current_node._data[next_random_step].child
             walking_path.append(next_random_step)
-            if not isinstance(current_node, self._bucket_type):
-                acc_rej_test_acceptance_prob *= current_node.size / acc_rej_test_max_fan_out
+            # todo  consider if not isinstance(current_node, self._bucket_type):
+            acc_rej_test_acceptance_prob *= current_node.size / acc_rej_test_max_fan_out
 
         next_random_step = np.random.randint(low=0, high=current_node.size)
         value_in_leaf = current_node.items()[next_random_step]
