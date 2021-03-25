@@ -3,7 +3,7 @@ import os
 
 os.environ["PURE_PYTHON"] = "True"
 
-from btrees.btree_ext_deprecated import OOBTreeExt, WALKING_TECHNIQUE
+from btrees.deprecated.btree_ext_deprecated import OOBTreeExt, WALKING_TECHNIQUE
 from build_tree.build_tree import generate_btree_index_x_values_with_dist
 
 prefix_to_percent = {
