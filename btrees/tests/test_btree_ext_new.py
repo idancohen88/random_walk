@@ -57,6 +57,15 @@ def _generate_3_height_btree():
 
     return my_index
 
+def test_btree_generation__custom_leaf_size_zipf_dist():
+    max_leaf_size = 10
+
+    wide_leaf_index = build_tree.generate_zipf_dist_custom_leaf(
+        num_of_values=50, max_value=50, skew_factor=0, leaf_size=max_leaf_size)
+    assert wide_leaf_index._real_max_leaf_size == max_leaf_size
+    assert all(bucket.size <= max_leaf_size for bucket in _iter_buckets(wide_leaf_index))
+
+
 
 def test_btree_generation__custom_leaf_size():
     prefix_to_percent = {"gggg": 0.53, "": 0.47}
@@ -66,12 +75,19 @@ def test_btree_generation__custom_leaf_size():
             num_of_values=5000, disired_prefix_to_percent_dist=prefix_to_percent
         )
 
+    assert all(bucket.size <= max_leaf_size for bucket in _iter_buckets(my_index))
     bucket = my_index._firstbucket
     assert bucket.size <= max_leaf_size
     while bucket._next:
         assert bucket.size <= max_leaf_size
         bucket = bucket._next
 
+def _iter_buckets(index):
+    bucket = index._firstbucket
+    yield bucket
+    while bucket._next:
+        bucket = bucket._next
+        yield bucket
 
 def _generate_4_height_btree():
     my_index = OOBTreeExt()
@@ -149,6 +165,7 @@ if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_btree_generation__custom_leaf_size_zipf_dist()
     test_generate_zipf_dist__sanity()
     test_distinct_values_estimator()
     test_run_all_samples__sanity()

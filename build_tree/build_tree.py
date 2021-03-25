@@ -85,6 +85,11 @@ def _freqs_to_data(freqs):
     return [x for num, freq in freqs.items() for x in [num] * round(freq)]
 
 
+def generate_zipf_dist_custom_leaf(num_of_values, max_value, skew_factor=0, leaf_size=30):
+    with overriding_btree_max_leaf_size(leaf_size):
+        return generate_zipf_dist(num_of_values, max_value, skew_factor)
+
+
 def generate_zipf_dist(num_of_values, max_value, skew_factor=0):
     print("start time %s" % datetime.now())
     relation_size = num_of_values
