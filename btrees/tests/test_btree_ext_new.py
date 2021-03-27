@@ -6,6 +6,8 @@ from unittest.mock import patch
 from BTrees import OOBTree
 
 import pandas as pd
+from numpy import random
+
 from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist
 from BTrees.OOBTree import OOBTreePy
@@ -22,6 +24,22 @@ def test_oklen_sanity():
     my_index = _generate_3_height_btree()
     assert len(my_index.sample_olken(sample_size)) == sample_size
 
+def test_btwrs_sanity():
+    sample_size = 3
+    my_index = _generate_3_height_btree()
+    assert len(my_index.sample_btwrs(sample_size)) == sample_size
+
+
+def test_btwrs_vs_olken_higher_prob():
+    my_index = _generate_3_height_btree()
+    with patch.object(random, 'randint', return_value=0):
+        _, olken_prob, olken_path = my_index._olken_walk_toward_bucket(node=my_index)
+        _, btwrs_prob, btwrs_path = my_index._btwrs_walk_toward_bucket(node=my_index)
+
+    assert olken_path == btwrs_path == [0, 0, 0]
+
+    # assert btwrs_prob > olken_prob
+    # todo +  add it to run_all_samples
 
 def test_ours_height_three_sanity():
     sample_size = 3
@@ -165,6 +183,7 @@ if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_btwrs_vs_olken_higher_prob()
     test_btree_generation__custom_leaf_size_zipf_dist()
     test_generate_zipf_dist__sanity()
     test_distinct_values_estimator()
@@ -172,6 +191,7 @@ if __name__ == "__main__":
     test_get_height()
     test_btree_generation__custom_leaf_size()
     test_oklen_sanity()
+    test_btwrs_sanity()
     test_olken__early_abort_sanity()
     test_ours_height_three_sanity()
     test_ours_height_four__walk_to_determine_root_coefs()

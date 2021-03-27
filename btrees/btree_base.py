@@ -54,7 +54,7 @@ class OOBTreeBase(OOBTreePy):
         sampled_tuples = kwargs["sampled_values"]
         sampled_values = [x[1] for x in sampled_tuples]
         sample_size = kwargs["sample_size"]
-        reject_counter = kwargs["reject_counter"] if "olken" in name else None
+        reject_counter = kwargs.get("reject_counter")
 
         running_time = (end_time - start_time).seconds
 
