@@ -8,6 +8,7 @@ from BTrees import OOBTree
 import pandas as pd
 from numpy import random
 
+from btrees import utils
 from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist
 from BTrees.OOBTree import OOBTreePy
@@ -49,6 +50,12 @@ def test_ours_height_three_sanity():
         == sample_size
     )
 
+def test_dataframe_to_histogram():
+    df_dataset = {"sampled_values_counter": "[('', 247), ('gggg', 117), ('hhhh', 77), ('mmmm', 53), ('rrrr', 6)]",
+                  "sample_size":1, "btree_size":1, "name":"olken", "btree_height":3, "max_leaf_size":3}
+    df = pd.DataFrame([df_dataset] * 4 )
+
+    utils.dataframe_to_histogram(df)
 
 def test_olken__early_abort_sanity():
     sample_size = 3
@@ -183,6 +190,7 @@ if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_dataframe_to_histogram()
     test_btwrs_vs_olken_higher_prob()
     test_btree_generation__custom_leaf_size_zipf_dist()
     test_generate_zipf_dist__sanity()
