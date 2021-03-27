@@ -96,8 +96,9 @@ def generate_zipf_dist(num_of_values, max_value, skew_factor=0):
     domain_size = max_value
     z = skew_factor
     freqs = {}
+    zipf_denominator = sum(1 / inner_i ** z for inner_i in range(1, domain_size + 1))
     for i in range(1, domain_size+1):
-        freqs[i] = relation_size * (1/i**z) / sum(1/inner_i**z for inner_i in range(1,domain_size+1))
+        freqs[i] = relation_size * (1/i**z) / zipf_denominator
 
     data = _freqs_to_data(freqs)
 

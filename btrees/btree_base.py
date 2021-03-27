@@ -127,6 +127,15 @@ class OOBTreeBase(OOBTreePy):
 
     def _distinct_values_estimator(self, sample_size, sampled_values):
         self._btree_size = self._btree_size or len(self.values())
+        group_size_to_number_of_groups = self._calculate_group_size_to_number_of_groups(sampled_values)
+
+        f1 = group_size_to_number_of_groups.get(1, 1)
+        group_size_to_number_of_groups.pop(1, None)
+        all_other_f_sums = sum(group_size_to_number_of_groups.values())
+        estimator = sqrt(self._btree_size / sample_size) * f1 + all_other_f_sums
+        return estimator
+
+    def _calculate_group_size_to_number_of_groups(self, sampled_values):
         count_values = Counter(sampled_values)
         count_values_ordered = sorted(count_values.items(), key=itemgetter(1))
         group_size_to_number_of_groups = {}
@@ -135,11 +144,7 @@ class OOBTreeBase(OOBTreePy):
             groups_of_size = group[0][1]
             number_of_groups = len(group)
             group_size_to_number_of_groups[groups_of_size] = number_of_groups
-        f1 = group_size_to_number_of_groups.get(1, 1)
-        group_size_to_number_of_groups.pop(1, None)
-        all_other_f_sums = sum(group_size_to_number_of_groups.values())
-        estimator = sqrt(self._btree_size / sample_size) * f1 + all_other_f_sums
-        return estimator
+        return group_size_to_number_of_groups
 
     def set_skew_factor(self, skew_factor):
         self._skew_factor = skew_factor
