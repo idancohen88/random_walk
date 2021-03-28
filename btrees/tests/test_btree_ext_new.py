@@ -186,10 +186,19 @@ def test_generate_zipf_dist__sanity():
     assert set(my_index_uniform.values()) > set(my_index_skewed.values())
 
 
+def test_all_samples_protected_from_big_k_size():
+    my_index = OOBTreeExt()
+    my_index.update({'a':1})
+    assert my_index.size == 1
+    my_index.run_all_samples(k=2)
+    assert True, 'otherwise, never finish'
+
+
 if __name__ == "__main__":
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 
+    test_all_samples_protected_from_big_k_size()
     test_dataframe_to_histogram()
     test_btwrs_vs_olken_higher_prob()
     test_btree_generation__custom_leaf_size_zipf_dist()

@@ -6,6 +6,7 @@ from btrees.btree_base import OOBTreeBase
 
 class OOBTreeExtOlken(OOBTreeBase):
     def sample_olken_early_abort(self, k):
+        k = self._min_between_k_and_btree_size(k)
         start_time = datetime.now()
         sampled_values = []
         sampled_paths = []
@@ -29,6 +30,7 @@ class OOBTreeExtOlken(OOBTreeBase):
         return sampled_values
 
     def sample_olken(self, k):
+        k = self._min_between_k_and_btree_size(k)
         start_time = datetime.now()
         sampled_values = []
         sampled_path = []

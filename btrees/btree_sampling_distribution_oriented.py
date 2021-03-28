@@ -13,6 +13,7 @@ class OOBTreeExtFanoutOriented(OOBTreeBase):
         self._cache_hit_counter = Counter()
 
     def sample_distribution_oriented_height_three(self, k):
+        k = self._min_between_k_and_btree_size(k)
         start_time = datetime.now()
         self._fanout_distribution_cache = {}
         self._cache_hit_counter = Counter()
@@ -50,6 +51,7 @@ class OOBTreeExtFanoutOriented(OOBTreeBase):
         return np.random.choice(current_node.size, p=node_distribution)
 
     def sample_distribution_oriented_height_four(self, k):
+        k = self._min_between_k_and_btree_size(k)
         start_time = datetime.now()
         self._fanout_distribution_cache = {}
         self._cache_hit_counter = Counter()

@@ -18,7 +18,7 @@ class OOBTreeBase(OOBTreePy):
     def __init__(self):
         super(OOBTreeBase).__init__()
         self._np_samples = []
-        self._btree_size = None
+        self._btree_size_value = None
         self._real_max_leaf_size = self._get_max_leaf_size_at_init()
         self._real_max_internal_size = self._get_max_internal_size_at_init()
         self._btree_height = None
@@ -27,6 +27,9 @@ class OOBTreeBase(OOBTreePy):
         self._domain_size = None
 
 
+    @property
+    def _btree_size(self):
+        return self._btree_size_value or len(self.values())
 
     def run_all_samples(self, k, iterations=1):
         if isinstance(k, int):
@@ -59,8 +62,6 @@ class OOBTreeBase(OOBTreePy):
         running_time = (end_time - start_time).seconds
 
         ks_stats, p_value = self._calculate_ks_test(sampled_values, sample_size)
-
-        self._btree_size = self._btree_size or len(self.values())
 
         sampled_values_counter = Counter(sampled_values).most_common(
             STATS_TOP_X_TO_SHOW
@@ -126,7 +127,6 @@ class OOBTreeBase(OOBTreePy):
         return rel_error
 
     def _distinct_values_estimator(self, sample_size, sampled_values):
-        self._btree_size = self._btree_size or len(self.values())
         group_size_to_number_of_groups = self._calculate_group_size_to_number_of_groups(sampled_values)
 
         f1 = group_size_to_number_of_groups.get(1, 1)
@@ -159,6 +159,8 @@ class OOBTreeBase(OOBTreePy):
         self._fanout_distribution_cache = {}
         self._cache_hit_counter = Counter()
 
+    def _min_between_k_and_btree_size(self, k):
+        return min(k, self._btree_size)
 
 def _accept_reject_test_pass(acceptance_prob):
     rand_num = np.random.random_sample()
