@@ -1,3 +1,4 @@
+from log import logger
 from collections import Counter
 from datetime import datetime
 import numpy as np
@@ -14,6 +15,7 @@ class OOBTreeExtFanoutOriented(OOBTreeBase):
 
     def sample_distribution_oriented_height_three(self, k):
         k = self._min_between_k_and_btree_size(k)
+        print(f"sampling {k}\{self._btree_size} using distribution_oriented_height_three")
         start_time = datetime.now()
         self._fanout_distribution_cache = {}
         self._cache_hit_counter = Counter()
@@ -52,6 +54,7 @@ class OOBTreeExtFanoutOriented(OOBTreeBase):
 
     def sample_distribution_oriented_height_four(self, k):
         k = self._min_between_k_and_btree_size(k)
+        print(f"sampling {k}\{self._btree_size} using distribution_oriented_height_four")
         start_time = datetime.now()
         self._fanout_distribution_cache = {}
         self._cache_hit_counter = Counter()

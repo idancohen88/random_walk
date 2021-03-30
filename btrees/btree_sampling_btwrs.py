@@ -6,6 +6,8 @@ from btrees.btree_base import OOBTreeBase
 
 class OOBTreeExtBtwrs(OOBTreeBase):  # BTree based Weighted Random Sampling
     def sample_btwrs(self, k):
+        k = self._min_between_k_and_btree_size(k)
+        print(f"sampling {k}\{self._btree_size} using btwrs")
         start_time = datetime.now()
         sampled_values = []
         sampled_path = []
@@ -46,8 +48,6 @@ class OOBTreeExtBtwrs(OOBTreeBase):  # BTree based Weighted Random Sampling
 
         next_random_step = np.random.randint(low=0, high=current_node.size)
         value_in_leaf = current_node.items()[next_random_step]
-
-        # acc_rej_test_acceptance_prob *= 1 / current_node.size # todo: not sure that need test in leaf level
 
         walking_path.append(next_random_step)
         return value_in_leaf, acc_rej_test_acceptance_prob, walking_path

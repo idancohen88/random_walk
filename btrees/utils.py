@@ -7,6 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from btrees.common import SAMPLING_TESTS_CSV
 
+PLOTS_PER_LINE = 3
+
 
 def get_samples_csv():
     if os.path.isfile(SAMPLING_TESTS_CSV):
@@ -19,15 +21,15 @@ def dataframe_to_histogram(df):
 
     groups_to_percents = list(map(_counter_to_percent, group_to_sizes))
 
-    for bunch_of_rows in grouped(zip(groups_to_percents, df.iterrows()),3):
+    for bunch_of_rows in grouped(zip(groups_to_percents, df.iterrows()), PLOTS_PER_LINE):
         _dataframe_to_histogram_every_3_subplots(bunch_of_rows)
 
 
 
 def _dataframe_to_histogram_every_3_subplots(groups_to_percents_and_df):
-    assert len(groups_to_percents_and_df) <= 3
+    assert len(groups_to_percents_and_df) <= PLOTS_PER_LINE
 
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(16, 5))
+    fig, axes = plt.subplots(nrows=1, ncols=PLOTS_PER_LINE, figsize=(16, 5))
     fig.tight_layout(pad=3.0)
     for i, (group_to_percent, related_row) in enumerate(filter(None,groups_to_percents_and_df)):
         if not group_to_percent:

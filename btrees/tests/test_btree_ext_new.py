@@ -1,9 +1,7 @@
 import os
-from contextlib import contextmanager
-from itertools import zip_longest
 from unittest.mock import patch
+import matplotlib.pyplot as plt
 
-from BTrees import OOBTree
 
 import pandas as pd
 from numpy import random
@@ -40,7 +38,6 @@ def test_btwrs_vs_olken_higher_prob():
     assert olken_path == btwrs_path == [0, 0, 0]
 
     # assert btwrs_prob > olken_prob
-    # todo +  add it to run_all_samples
 
 def test_ours_height_three_sanity():
     sample_size = 3
@@ -55,7 +52,8 @@ def test_dataframe_to_histogram():
                   "sample_size":1, "btree_size":1, "name":"olken", "btree_height":3, "max_leaf_size":3}
     df = pd.DataFrame([df_dataset] * 4 )
 
-    utils.dataframe_to_histogram(df)
+    with patch.object(plt, 'show'):
+        utils.dataframe_to_histogram(df)
 
 def test_olken__early_abort_sanity():
     sample_size = 3
@@ -195,6 +193,8 @@ def test_all_samples_protected_from_big_k_size():
 
 
 if __name__ == "__main__":
+    build_tree.generate_zipf_dist_custom_leaf(num_of_values=1 * 500, max_value=1_000, skew_factor=0.5)
+
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
 

@@ -3,7 +3,7 @@ from datetime import datetime
 from itertools import groupby
 from math import sqrt
 from operator import itemgetter
-
+import logging
 import numpy as np
 from BTrees.OOBTree import OOBTreePy
 from scipy import stats
@@ -37,10 +37,12 @@ class OOBTreeBase(OOBTreePy):
 
         for sample_size in k:
             for i in range(iterations):
+                logging.info('sample size %s iteration %s', sample_size, i)
                 self.sample_distribution_oriented_height_four(sample_size)
                 self.sample_distribution_oriented_height_three(sample_size)
                 self.sample_olken(sample_size)
                 self.sample_olken_early_abort(sample_size)
+                self.sample_btwrs(sample_size)
 
     def _get_max_leaf_size_at_init(self):
         # saving the value, even if it's mocked
