@@ -7,7 +7,7 @@ from btrees.btree_base import OOBTreeBase
 class OOBTreeExtBtwrs(OOBTreeBase):  # BTree based Weighted Random Sampling
     def sample_btwrs(self, k):
         k = self._min_between_k_and_btree_size(k)
-        print(f"sampling {k}\{self._btree_size} using btwrs")
+        print(f"{datetime.now()} - sampling {k}\{self._btree_size} using btwrs")
         start_time = datetime.now()
         sampled_values = []
         sampled_path = []

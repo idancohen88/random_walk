@@ -37,7 +37,7 @@ class OOBTreeBase(OOBTreePy):
 
         for sample_size in k:
             for i in range(iterations):
-                logging.info('sample size %s iteration %s', sample_size, i)
+                print(f'{datetime.now()} - sample size {sample_size} iteration {i}')
                 self.sample_distribution_oriented_height_four(sample_size)
                 self.sample_distribution_oriented_height_three(sample_size)
                 self.sample_olken(sample_size)
