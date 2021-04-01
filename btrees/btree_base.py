@@ -25,6 +25,7 @@ class OOBTreeBase(OOBTreePy):
         self._num_distinct_values = None
         self._skew_factor = None
         self._domain_size = None
+        self._data_generation_method = None
 
 
     @property
@@ -53,6 +54,7 @@ class OOBTreeBase(OOBTreePy):
         return self.max_internal_size
 
     def _persist_sampling_stats(self, **kwargs):
+        assert self._data_generation_method, 'must define _data_generation_method'
         end_time = datetime.now()
         name = kwargs["name"]
         start_time = kwargs["start_time"]
@@ -86,7 +88,8 @@ class OOBTreeBase(OOBTreePy):
             btree_height=self._btree_height or self._get_height(),
             distinct_values_error=distinct_values_error_metric,
             skew_factor=self._skew_factor,
-            domain_size=self._domain_size
+            domain_size=self._domain_size,
+            _data_generation_method=self._data_generation_method,
         )
 
         self._clean_counters()

@@ -78,6 +78,7 @@ def _generate_3_height_btree():
         my_index._data[0].child._data[0].child, my_index._bucket_type
     ), "3 height btree must arrive to bucket after wo steps"
 
+    my_index._data_generation_method = 'test'
     return my_index
 
 def test_btree_generation__custom_leaf_size_zipf_dist():
@@ -123,12 +124,14 @@ def _generate_4_height_btree():
     assert isinstance(
         my_index._data[0].child._data[0].child._data[0].child, my_index._bucket_type
     ), "4 height btree must arrive to bucket after wo steps"
+    my_index._data_generation_method = 'test'
     return my_index
 
 
 def test_sample_distribution_height_four():
     sample_size = 3
     my_index = _generate_4_height_btree()
+    my_index._data_generation_method = 'test'
     assert (
         len(my_index.sample_distribution_oriented_height_four(sample_size))
         == sample_size
@@ -153,7 +156,7 @@ def test_persisting_stats():
     assert len(csv) == 2
     expected_columns = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
         "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor", "domain_size"}
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method"}
     assert set(csv.columns) == expected_columns
 
 def test_get_height():
@@ -176,7 +179,9 @@ def test_distinct_values_estimator():
 
 def test_run_all_samples__sanity():
     my_index = _generate_4_height_btree()
+    my_index._data_generation_method = 'test'
     my_index.run_all_samples(1,1)
+    my_index._data_generation_method = 'test'
 
 def test_generate_zipf_dist__sanity():
     my_index_uniform = generate_zipf_dist(num_of_values=50, max_value=50, skew_factor=0)
@@ -186,9 +191,11 @@ def test_generate_zipf_dist__sanity():
 
 def test_all_samples_protected_from_big_k_size():
     my_index = OOBTreeExt()
+    my_index._data_generation_method = 'test'
     my_index.update({'a':1})
     assert my_index.size == 1
     my_index.run_all_samples(k=2)
+    my_index._data_generation_method = 'test'
     assert True, 'otherwise, never finish'
 
 
