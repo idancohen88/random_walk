@@ -94,7 +94,7 @@ class OOBTreeBase(OOBTreePy):
             distinct_values_error=distinct_values_error_metric,
             skew_factor=self._skew_factor,
             domain_size=self._domain_size,
-            _data_generation_method=self._data_generation_method, # todo: change to data_generation_method
+            data_generation_method=self._data_generation_method,
         )
 
         self._clean_counters()

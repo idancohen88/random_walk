@@ -18,13 +18,13 @@ def generate_btree_index_x_values_with_dist(
 ):
     print("start time %s" % datetime.now())
     my_index = my_index if my_index is not None else OOBTreeExt()
-    my_index._data_generation_method='prefix_clusters'
+
     for prefix, amount_percent in disired_prefix_to_percent_dist.items():
         amount = int(num_of_values * amount_percent)
         my_index = insert_to_index_random(my_index, amount, prefix)
 
     print("finish at %s" % datetime.now())
-    my_index.set_data_generation_method('clusters')
+    my_index.set_data_generation_method('prefix_clusters')
     return my_index
 
 
@@ -109,7 +109,6 @@ def generate_zipf_dist(num_of_values, domain_size, skew_factor=0):
     data = _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor)
 
     my_index = OOBTreeExt()
-    my_index._data_generation_method='zipf'
     my_index.update(data)
     my_index.set_skew_factor(skew_factor)
     my_index.set_data_generation_method('zipf')

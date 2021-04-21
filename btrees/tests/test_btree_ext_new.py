@@ -157,7 +157,7 @@ def test_persisting_stats():
     assert len(csv) == 2
     expected_columns = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
         "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "_data_generation_method"}
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method"}
     assert set(csv.columns) == expected_columns
 
 def test_get_height():

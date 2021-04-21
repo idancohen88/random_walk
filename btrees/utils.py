@@ -12,10 +12,10 @@ PLOTS_PER_LINE = 3
 
 def get_samples_csv():
     if os.path.isfile(SAMPLING_TESTS_CSV):
-        return pd.read_csv(SAMPLING_TESTS_CSV)
-    df = pd.DataFrame()
-    1/0
-    print('new version')
+        df =  pd.read_csv(SAMPLING_TESTS_CSV)
+    else:
+        df = pd.DataFrame()
+
     df = df.fillna(0)
     return df
 
