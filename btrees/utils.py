@@ -13,7 +13,11 @@ PLOTS_PER_LINE = 3
 def get_samples_csv():
     if os.path.isfile(SAMPLING_TESTS_CSV):
         return pd.read_csv(SAMPLING_TESTS_CSV)
-    return pd.DataFrame()
+    df = pd.DataFrame()
+    1/0
+    print('new version')
+    df = df.fillna(0)
+    return df
 
 
 def dataframe_to_histogram(df):
