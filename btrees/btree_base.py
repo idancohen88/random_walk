@@ -21,16 +21,21 @@ class OOBTreeBase(OOBTreePy):
         self._btree_size_value = None
         self._real_max_leaf_size = self._get_max_leaf_size_at_init()
         self._real_max_internal_size = self._get_max_internal_size_at_init()
-        self._btree_height = None
+        self._btree_height_value = None
         self._num_distinct_values = None
         self._skew_factor = None
         self._domain_size = None
         self._data_generation_method = None
 
-
     @property
     def _btree_size(self):
-        return self._btree_size_value or len(self.values())
+        self._btree_size_value = self._btree_size_value or len(self.values())
+        return self._btree_size_value
+
+    @property
+    def _btree_height(self):
+        self._btree_height_value = self._btree_height_value or self._get_height()
+        return self._btree_height_value
 
     def run_all_samples(self, k, iterations=1):
         if isinstance(k, int):
@@ -85,11 +90,11 @@ class OOBTreeBase(OOBTreePy):
             max_leaf_size=self._real_max_leaf_size,
             max_internal_size=self._real_max_internal_size,
             btree_size=self._btree_size,
-            btree_height=self._btree_height or self._get_height(),
+            btree_height=self._btree_height_value,
             distinct_values_error=distinct_values_error_metric,
             skew_factor=self._skew_factor,
             domain_size=self._domain_size,
-            _data_generation_method=self._data_generation_method,
+            _data_generation_method=self._data_generation_method, # todo: change to data_generation_method
         )
 
         self._clean_counters()
@@ -155,7 +160,7 @@ class OOBTreeBase(OOBTreePy):
         self._skew_factor = skew_factor
 
     def set_data_generation_method(self, method):
-        self._method = method
+        self._data_generation_method = method
 
     def set_domain_size(self, domain_size):
         self._domain_size = domain_size

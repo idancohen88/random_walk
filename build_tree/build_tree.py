@@ -1,3 +1,4 @@
+import random
 from contextlib import contextmanager
 from datetime import datetime
 from unittest.mock import patch
@@ -86,28 +87,44 @@ def _freqs_to_data(freqs):
     return [x for num, freq in freqs.items() for x in [num] * round(freq)]
 
 
-def generate_zipf_dist_custom_leaf(num_of_values, max_value, skew_factor=0, leaf_size=30):
+def generate_zipf_dist_custom_leaf(num_of_values, domain_size, skew_factor=0, leaf_size=30):
     with overriding_btree_max_leaf_size(leaf_size):
-        return generate_zipf_dist(num_of_values, max_value, skew_factor)
+        return generate_zipf_dist(num_of_values, domain_size, skew_factor)
 
 
-def generate_zipf_dist(num_of_values, max_value, skew_factor=0):
+def generate_zipf_dist_in_random_order(num_of_values, domain_size, skew_factor=0):
+    data = _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor)
+    random.shuffle(data)
+    my_index = OOBTreeExt()
+    my_index.update(data)
+    my_index.set_skew_factor(skew_factor)
+    my_index.set_data_generation_method('zipf_random_order')
+    my_index.set_domain_size(domain_size)
+    print("finish at %s" % datetime.now())
+    return my_index
+
+
+def generate_zipf_dist(num_of_values, domain_size, skew_factor=0):
     print("start time %s" % datetime.now())
-    relation_size = num_of_values
-    domain_size = max_value
-    z = skew_factor
-    freqs = {}
-    zipf_denominator = sum(1 / inner_i ** z for inner_i in range(1, domain_size + 1))
-    for i in range(1, domain_size+1):
-        freqs[i] = relation_size * (1/i**z) / zipf_denominator
-
-    data = _freqs_to_data(freqs)
+    data = _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor)
 
     my_index = OOBTreeExt()
     my_index._data_generation_method='zipf'
-    my_index.update(dict(zip(range(len(data)), data)))
+    my_index.update(data)
     my_index.set_skew_factor(skew_factor)
     my_index.set_data_generation_method('zipf')
     my_index.set_domain_size(domain_size)
     print("finish at %s" % datetime.now())
     return my_index
+
+
+def _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor):
+    relation_size = num_of_values
+    z = skew_factor
+    freqs = {}
+    zipf_denominator = sum(1 / inner_i ** z for inner_i in range(1, domain_size + 1))
+    for i in range(1, domain_size + 1):
+        freqs[i] = relation_size * (1 / i ** z) / zipf_denominator
+    data = _freqs_to_data(freqs)
+    data = dict(zip(range(len(data)), data))
+    return data

@@ -8,7 +8,8 @@ from numpy import random
 
 from btrees import utils
 from build_tree import build_tree
-from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist
+from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist, \
+    generate_zipf_dist_in_random_order
 from BTrees.OOBTree import OOBTreePy
 
 from btrees.btree_ext import OOBTreeExt
@@ -85,7 +86,7 @@ def test_btree_generation__custom_leaf_size_zipf_dist():
     max_leaf_size = 10
 
     wide_leaf_index = build_tree.generate_zipf_dist_custom_leaf(
-        num_of_values=50, max_value=50, skew_factor=0, leaf_size=max_leaf_size)
+        num_of_values=50, domain_size=50, skew_factor=0, leaf_size=max_leaf_size)
     assert wide_leaf_index._real_max_leaf_size == max_leaf_size
     assert all(bucket.size <= max_leaf_size for bucket in _iter_buckets(wide_leaf_index))
 
@@ -156,7 +157,7 @@ def test_persisting_stats():
     assert len(csv) == 2
     expected_columns = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
         "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method"}
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "_data_generation_method"}
     assert set(csv.columns) == expected_columns
 
 def test_get_height():
@@ -183,9 +184,15 @@ def test_run_all_samples__sanity():
     my_index.run_all_samples(1,1)
     my_index._data_generation_method = 'test'
 
+def test_generate_zipf_dist_random_order__sanity():
+    my_index_uniform = generate_zipf_dist_in_random_order(num_of_values=50, domain_size=50, skew_factor=0)
+    my_index_skewed = generate_zipf_dist_in_random_order(num_of_values=50, domain_size=50, skew_factor=0.9)
+    assert set(my_index_uniform.values()) > set(my_index_skewed.values())
+
+
 def test_generate_zipf_dist__sanity():
-    my_index_uniform = generate_zipf_dist(num_of_values=50, max_value=50, skew_factor=0)
-    my_index_skewed = generate_zipf_dist(num_of_values=50, max_value=50, skew_factor=0.9)
+    my_index_uniform = generate_zipf_dist(num_of_values=50, domain_size=50, skew_factor=0)
+    my_index_skewed = generate_zipf_dist(num_of_values=50, domain_size=50, skew_factor=0.9)
     assert set(my_index_uniform.values()) > set(my_index_skewed.values())
 
 
@@ -200,7 +207,7 @@ def test_all_samples_protected_from_big_k_size():
 
 
 if __name__ == "__main__":
-    build_tree.generate_zipf_dist_custom_leaf(num_of_values=1 * 500, max_value=1_000, skew_factor=0.5)
+    build_tree.generate_zipf_dist_custom_leaf(num_of_values=1 * 500, domain_size=1_000, skew_factor=0.5)
 
     if os.path.exists(SAMPLING_TESTS_CSV):
         os.remove(SAMPLING_TESTS_CSV)
@@ -210,6 +217,7 @@ if __name__ == "__main__":
     test_btwrs_vs_olken_higher_prob()
     test_btree_generation__custom_leaf_size_zipf_dist()
     test_generate_zipf_dist__sanity()
+    test_generate_zipf_dist_random_order__sanity()
     test_distinct_values_estimator()
     test_run_all_samples__sanity()
     test_get_height()

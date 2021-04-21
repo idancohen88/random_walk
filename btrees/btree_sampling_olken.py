@@ -31,7 +31,7 @@ class OOBTreeExtOlken(OOBTreeBase):
         return sampled_values
 
     def sample_olken(self, k):
-        print(f"sampling {k}\{self._btree_size} using sample_olken")
+        print(f"{datetime.now()} - sampling {k}\{self._btree_size} using sample_olken")
         k = self._min_between_k_and_btree_size(k)
         start_time = datetime.now()
         sampled_values = []
