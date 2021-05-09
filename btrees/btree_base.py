@@ -90,7 +90,7 @@ class OOBTreeBase(OOBTreePy):
             max_leaf_size=self._real_max_leaf_size,
             max_internal_size=self._real_max_internal_size,
             btree_size=self._btree_size,
-            btree_height=self._btree_height_value,
+            btree_height=self._btree_height,
             distinct_values_error=distinct_values_error_metric,
             skew_factor=self._skew_factor,
             domain_size=self._domain_size,
