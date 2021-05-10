@@ -13,6 +13,14 @@ from btrees.utils import get_samples_csv
 
 STATS_TOP_X_TO_SHOW = 10
 
+SAMPLING_METHODS = [
+    "sample_distribution_oriented_height_four",
+    "sample_distribution_oriented_height_three",
+    "sample_olken",
+    "sample_olken_early_abort",
+    "sample_btwrs",
+]
+
 
 class OOBTreeBase(OOBTreePy):
     def __init__(self):
@@ -39,16 +47,14 @@ class OOBTreeBase(OOBTreePy):
 
     def run_all_samples(self, k, iterations=1):
         if isinstance(k, int):
-            k=[k]
+            k = [k]
 
         for sample_size in k:
             for i in range(iterations):
-                print(f'{datetime.now()} - sample size {sample_size} iteration {i}')
-                self.sample_distribution_oriented_height_four(sample_size)
-                self.sample_distribution_oriented_height_three(sample_size)
-                self.sample_olken(sample_size)
-                self.sample_olken_early_abort(sample_size)
-                self.sample_btwrs(sample_size)
+                print(f"{datetime.now()} - sample size {sample_size} iteration {i}")
+                for sampling_method in SAMPLING_METHODS:
+                    method_callable = getattr(self, sampling_method)
+                    method_callable(sample_size)
 
     def _get_max_leaf_size_at_init(self):
         # saving the value, even if it's mocked
@@ -59,7 +65,7 @@ class OOBTreeBase(OOBTreePy):
         return self.max_internal_size
 
     def _persist_sampling_stats(self, **kwargs):
-        assert self._data_generation_method, 'must define _data_generation_method'
+        assert self._data_generation_method, "must define _data_generation_method"
         end_time = datetime.now()
         name = kwargs["name"]
         start_time = kwargs["start_time"]
@@ -76,7 +82,9 @@ class OOBTreeBase(OOBTreePy):
             STATS_TOP_X_TO_SHOW
         )
 
-        distinct_values_error_metric = self._distinct_values_error_metric(sampled_values, sample_size)
+        distinct_values_error_metric = self._distinct_values_error_metric(
+            sampled_values, sample_size
+        )
 
         sampled_csv = self._append_to_df(
             name=name,
@@ -130,14 +138,20 @@ class OOBTreeBase(OOBTreePy):
         if not sampled_values:
             return 0
 
-        distinct_values_estimator = self._distinct_values_estimator(sample_size, sampled_values)
-        self._num_distinct_values = self._num_distinct_values  or len(set(self.values()))
-        rel_error = (self._num_distinct_values - distinct_values_estimator) / self._btree_size
+        distinct_values_estimator = self._distinct_values_estimator(
+            sample_size, sampled_values
+        )
+        self._num_distinct_values = self._num_distinct_values or len(set(self.values()))
+        rel_error = (
+            self._num_distinct_values - distinct_values_estimator
+        ) / self._btree_size
 
         return rel_error
 
     def _distinct_values_estimator(self, sample_size, sampled_values):
-        group_size_to_number_of_groups = self._calculate_group_size_to_number_of_groups(sampled_values)
+        group_size_to_number_of_groups = self._calculate_group_size_to_number_of_groups(
+            sampled_values
+        )
 
         f1 = group_size_to_number_of_groups.get(1, 1)
         group_size_to_number_of_groups.pop(1, None)
@@ -171,6 +185,7 @@ class OOBTreeBase(OOBTreePy):
 
     def _min_between_k_and_btree_size(self, k):
         return min(k, self._btree_size)
+
 
 def _accept_reject_test_pass(acceptance_prob):
     rand_num = np.random.random_sample()

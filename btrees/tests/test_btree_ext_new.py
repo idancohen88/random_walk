@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 
 
 import pandas as pd
+import pytest
 from numpy import random
 
 from btrees import utils
+from btrees.btree_base import SAMPLING_METHODS
 from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist, \
     generate_zipf_dist_in_random_order
@@ -19,6 +21,11 @@ MAX_INTERNAL_SIZE = 5
 MAX_LEAF_SIZE = 5
 
 
+@pytest.fixture(autouse=True)
+def remove_csv_file():
+    if os.path.exists(SAMPLING_TESTS_CSV):
+        os.remove(SAMPLING_TESTS_CSV)
+
 def test_oklen_sanity():
     sample_size = 3
     my_index = _generate_3_height_btree()
@@ -28,6 +35,18 @@ def test_btwrs_sanity():
     sample_size = 3
     my_index = _generate_3_height_btree()
     assert len(my_index.sample_btwrs(sample_size)) == sample_size
+
+def test_all_sampling_methods_write_to_csv_with_all_metadata():
+    my_index = _generate_3_height_btree()
+    my_index.run_all_samples(k=1, iterations=1)
+    csv = pd.read_csv(SAMPLING_TESTS_CSV)
+
+    assert len(csv) == len(SAMPLING_METHODS)
+    mandatory_fields = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
+        "running_time", "max_leaf_size", "max_internal_size", "btree_size",
+        "btree_height", "distinct_values_error", "skew_factor" , "data_generation_method"}
+
+    assert all([len(csv[field].notnull()) == len(SAMPLING_METHODS) for field in mandatory_fields])
 
 
 def test_btwrs_vs_olken_higher_prob():
@@ -147,8 +166,6 @@ def test_ours_height_four__walk_to_determine_root_coefs():
 
 
 def test_persisting_stats():
-    if os.path.exists(SAMPLING_TESTS_CSV):
-        os.remove(SAMPLING_TESTS_CSV)
     my_index = _generate_4_height_btree()
     my_index.sample_olken(1)
     my_index.sample_distribution_oriented_height_four(1)
@@ -204,28 +221,3 @@ def test_all_samples_protected_from_big_k_size():
     my_index.run_all_samples(k=2)
     my_index._data_generation_method = 'test'
     assert True, 'otherwise, never finish'
-
-
-if __name__ == "__main__":
-    build_tree.generate_zipf_dist_custom_leaf(num_of_values=1 * 500, domain_size=1_000, skew_factor=0.5)
-
-    if os.path.exists(SAMPLING_TESTS_CSV):
-        os.remove(SAMPLING_TESTS_CSV)
-
-    test_all_samples_protected_from_big_k_size()
-    test_dataframe_to_histogram()
-    test_btwrs_vs_olken_higher_prob()
-    test_btree_generation__custom_leaf_size_zipf_dist()
-    test_generate_zipf_dist__sanity()
-    test_generate_zipf_dist_random_order__sanity()
-    test_distinct_values_estimator()
-    test_run_all_samples__sanity()
-    test_get_height()
-    test_btree_generation__custom_leaf_size()
-    test_oklen_sanity()
-    test_btwrs_sanity()
-    test_olken__early_abort_sanity()
-    test_ours_height_three_sanity()
-    test_ours_height_four__walk_to_determine_root_coefs()
-    test_sample_distribution_height_four()
-    test_persisting_stats()
