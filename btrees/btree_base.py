@@ -35,6 +35,8 @@ class OOBTreeBase(OOBTreePy):
         self._skew_factor = None
         self._domain_size = None
         self._data_generation_method = None
+        self.btree_id = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
+
 
     @property
     def _btree_size(self):
@@ -107,6 +109,7 @@ class OOBTreeBase(OOBTreePy):
             skew_factor=self._skew_factor,
             domain_size=self._domain_size,
             data_generation_method=self._data_generation_method,
+            btree_id=self.btree_id
         )
 
         self._clean_counters()

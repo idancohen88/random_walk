@@ -21,6 +21,12 @@ MAX_INTERNAL_SIZE = 5
 MAX_LEAF_SIZE = 5
 
 
+CSV_FIELDS = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
+        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method", "btree_id"}
+MANDATORY_FIELDS = CSV_FIELDS - {"p_value", "reject_counter", "skew_factor", "domain_size"}
+
+
 @pytest.fixture(autouse=True)
 def remove_csv_file():
     if os.path.exists(SAMPLING_TESTS_CSV):
@@ -50,11 +56,8 @@ def test_all_sampling_methods_write_to_csv_with_all_metadata__also_dummies():
     expected_sampling_methods = len(SAMPLING_METHODS) + len(DUMMIES_SAMPLING_METHODS)
 
     assert len(csv) == expected_sampling_methods
-    mandatory_fields = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor" , "data_generation_method"}
 
-    assert all([len(csv[field].notnull()) == expected_sampling_methods for field in mandatory_fields])
+    assert all([len(csv[field].notnull()) == expected_sampling_methods for field in MANDATORY_FIELDS])
 
 
 
@@ -64,11 +67,8 @@ def test_all_sampling_methods_write_to_csv_with_all_metadata():
     csv = pd.read_csv(SAMPLING_TESTS_CSV)
 
     assert len(csv) == len(SAMPLING_METHODS)
-    mandatory_fields = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor" , "data_generation_method"}
 
-    assert all([len(csv[field].notnull()) == len(SAMPLING_METHODS) for field in mandatory_fields])
+    assert all([len(csv[field].notnull()) == len(SAMPLING_METHODS) for field in MANDATORY_FIELDS])
 
 
 def test_btwrs_vs_olken_higher_prob():
@@ -194,10 +194,7 @@ def test_persisting_stats():
 
     csv = pd.read_csv(SAMPLING_TESTS_CSV)
     assert len(csv) == 2
-    expected_columns = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
-        "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method"}
-    assert set(csv.columns) == expected_columns
+    assert set(csv.columns) == CSV_FIELDS
 
 def test_get_height():
     my_index = _generate_4_height_btree()
