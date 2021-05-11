@@ -3,7 +3,6 @@ from datetime import datetime
 from itertools import groupby
 from math import sqrt
 from operator import itemgetter
-import logging
 import numpy as np
 from BTrees.OOBTree import OOBTreePy
 from scipy import stats
@@ -57,6 +56,7 @@ class OOBTreeBase(OOBTreePy):
             for i in range(iterations):
                 print(f"{datetime.now()} - sample size {sample_size} iteration {i}")
                 for sampling_method in samplings_methods:
+                    print(f"{datetime.now()} - sampling {k}\{self._btree_size} using {sampling_method}")
                     method_callable = getattr(self, sampling_method)
                     method_callable(sample_size)
 
