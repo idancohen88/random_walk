@@ -21,6 +21,8 @@ SAMPLING_METHODS = [
     "sample_btwrs",
 ]
 
+DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy"]
+
 
 class OOBTreeBase(OOBTreePy):
     def __init__(self):
@@ -45,14 +47,16 @@ class OOBTreeBase(OOBTreePy):
         self._btree_height_value = self._btree_height_value or self._get_height()
         return self._btree_height_value
 
-    def run_all_samples(self, k, iterations=1):
+    def run_all_samples(self, k, iterations=1, run_also_dummies=False):
         if isinstance(k, int):
             k = [k]
+
+        samplings_methods = SAMPLING_METHODS + (DUMMIES_SAMPLING_METHODS if run_also_dummies else [])
 
         for sample_size in k:
             for i in range(iterations):
                 print(f"{datetime.now()} - sample size {sample_size} iteration {i}")
-                for sampling_method in SAMPLING_METHODS:
+                for sampling_method in samplings_methods:
                     method_callable = getattr(self, sampling_method)
                     method_callable(sample_size)
 

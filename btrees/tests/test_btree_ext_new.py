@@ -8,7 +8,7 @@ import pytest
 from numpy import random
 
 from btrees import utils
-from btrees.btree_base import SAMPLING_METHODS
+from btrees.btree_base import SAMPLING_METHODS, DUMMIES_SAMPLING_METHODS
 from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist, \
     generate_zipf_dist_in_random_order
@@ -35,6 +35,28 @@ def test_btwrs_sanity():
     sample_size = 3
     my_index = _generate_3_height_btree()
     assert len(my_index.sample_btwrs(sample_size)) == sample_size
+
+def test_monkey_sample():
+    sample_size = 3
+    my_index = _generate_3_height_btree()
+    assert len(my_index.sample_monkey(sample_size)) == sample_size
+
+
+def test_all_sampling_methods_write_to_csv_with_all_metadata__also_dummies():
+    my_index = _generate_3_height_btree()
+    my_index.run_all_samples(k=1, iterations=1, run_also_dummies=True)
+    csv = pd.read_csv(SAMPLING_TESTS_CSV)
+
+    expected_sampling_methods = len(SAMPLING_METHODS) + len(DUMMIES_SAMPLING_METHODS)
+
+    assert len(csv) == expected_sampling_methods
+    mandatory_fields = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
+        "running_time", "max_leaf_size", "max_internal_size", "btree_size",
+        "btree_height", "distinct_values_error", "skew_factor" , "data_generation_method"}
+
+    assert all([len(csv[field].notnull()) == expected_sampling_methods for field in mandatory_fields])
+
+
 
 def test_all_sampling_methods_write_to_csv_with_all_metadata():
     my_index = _generate_3_height_btree()
