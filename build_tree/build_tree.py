@@ -94,9 +94,11 @@ def generate_zipf_dist_custom_leaf(num_of_values, domain_size, skew_factor=0, le
 
 def generate_zipf_dist_in_random_order(num_of_values, domain_size, skew_factor=0):
     data = _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor)
-    random.shuffle(data)
+    data_items = list(data.items())
+    random.shuffle(data_items)
+    data_items_dict = dict(data_items)
     my_index = OOBTreeExt()
-    my_index.update(data)
+    my_index.update(data_items_dict)
     my_index.set_skew_factor(skew_factor)
     my_index.set_data_generation_method('zipf_random_order')
     my_index.set_domain_size(domain_size)
