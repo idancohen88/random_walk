@@ -58,7 +58,7 @@ class OOBTreeBase(OOBTreePy):
             for i in range(iterations):
                 print(f"{datetime.now()} - sample size {sample_size} iteration {i}")
                 for sampling_method in samplings_methods:
-                    print(f"{datetime.now()} - sampling {k}\{self._btree_size} using {sampling_method}")
+                    print(f"{datetime.now()} - sampling {sample_size}\{self._btree_size} using {sampling_method}")
                     method_callable = getattr(self, sampling_method)
                     method_callable(sample_size)
 
