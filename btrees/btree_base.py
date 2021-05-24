@@ -20,7 +20,7 @@ SAMPLING_METHODS = [
     "sample_btwrs",
 ]
 
-DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy"]
+DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy", "sample_naive_random_walk"]
 
 
 class OOBTreeBase(OOBTreePy):

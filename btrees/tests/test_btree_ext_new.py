@@ -47,6 +47,10 @@ def test_monkey_sample():
     my_index = _generate_3_height_btree()
     assert len(my_index.sample_monkey(sample_size)) == sample_size
 
+def test_naive_random_walk_sanity():
+    sample_size = 3
+    my_index = _generate_3_height_btree()
+    assert len(my_index.sample_naive_random_walk(sample_size)) == sample_size
 
 def test_all_sampling_methods_write_to_csv_with_all_metadata__also_dummies():
     my_index = _generate_3_height_btree()
