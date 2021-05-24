@@ -11,7 +11,6 @@ class OOBTreeExtNaiveRandomWalk(OOBTreeBase):
 
         sampled_values = []
         sampled_paths = []
-        reject_counter = 0
         while len(sampled_values) < k:
             value, path = self._naive_random_walk_to_leaf()
 
