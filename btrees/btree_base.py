@@ -37,7 +37,6 @@ class OOBTreeBase(OOBTreePy):
         self._data_generation_method = None
         self.btree_id = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
 
-
     @property
     def _btree_size(self):
         self._btree_size_value = self._btree_size_value or len(self.values())
@@ -49,16 +48,24 @@ class OOBTreeBase(OOBTreePy):
         return self._btree_height_value
 
     def run_all_samples(self, k, iterations=1, run_also_dummies=False):
+        samplings_methods = SAMPLING_METHODS + (
+            DUMMIES_SAMPLING_METHODS if run_also_dummies else []
+        )
+        return self.run_sample_methods(k, iterations, samplings_methods)
+
+    def run_sample_methods(self, k, iterations=1, sampling_methods=[]):
+        assert set(sampling_methods) - set(SAMPLING_METHODS) - set(DUMMIES_SAMPLING_METHODS) == set()
+
         if isinstance(k, int):
             k = [k]
-
-        samplings_methods = SAMPLING_METHODS + (DUMMIES_SAMPLING_METHODS if run_also_dummies else [])
 
         for sample_size in k:
             for i in range(iterations):
                 print(f"{datetime.now()} - sample size {sample_size} iteration {i}")
-                for sampling_method in samplings_methods:
-                    print(f"{datetime.now()} - sampling {sample_size}\{self._btree_size} using {sampling_method}")
+                for sampling_method in sampling_methods:
+                    print(
+                        f"{datetime.now()} - sampling {sample_size}\{self._btree_size} using {sampling_method}"
+                    )
                     method_callable = getattr(self, sampling_method)
                     method_callable(sample_size)
 
@@ -109,7 +116,7 @@ class OOBTreeBase(OOBTreePy):
             skew_factor=self._skew_factor,
             domain_size=self._domain_size,
             data_generation_method=self._data_generation_method,
-            btree_id=self.btree_id
+            btree_id=self.btree_id,
         )
 
         self._clean_counters()
