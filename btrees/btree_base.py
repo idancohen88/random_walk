@@ -10,7 +10,7 @@ from scipy import stats
 from btrees.common import SAMPLING_TESTS_CSV
 from btrees.utils import get_samples_csv
 
-STATS_TOP_X_TO_SHOW = 10
+STATS_TOP_X_TO_SHOW = 20
 
 SAMPLING_METHODS = [
     "sample_distribution_oriented_height_four",
