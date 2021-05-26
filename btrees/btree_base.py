@@ -54,7 +54,8 @@ class OOBTreeBase(OOBTreePy):
         return self.run_sample_methods(k, iterations, samplings_methods)
 
     def run_sample_methods(self, k, iterations=1, sampling_methods=[]):
-        assert set(sampling_methods) - set(SAMPLING_METHODS) - set(DUMMIES_SAMPLING_METHODS) == set()
+        unknown_sampling_methods = set(sampling_methods) - set(SAMPLING_METHODS) - set(DUMMIES_SAMPLING_METHODS)
+        assert not unknown_sampling_methods, f"unkown sampling methods {unknown_sampling_methods}"
 
         if isinstance(k, int):
             k = [k]
