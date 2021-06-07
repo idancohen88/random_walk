@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 from itertools import groupby
 from math import sqrt
@@ -36,6 +36,7 @@ class OOBTreeBase(OOBTreePy):
         self._domain_size = None
         self._data_generation_method = None
         self.btree_id = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
+        self.sampled_paths = defaultdict(list)
 
     @property
     def _btree_size(self):
@@ -122,6 +123,10 @@ class OOBTreeBase(OOBTreePy):
 
         self._clean_counters()
         return sampled_csv
+
+    def save_sampled_path(self, name,k,
+                               sampled_paths):
+        self.sampled_paths[(name,k)].append(sampled_paths)
 
     def _append_to_df(self, **kwargs):
         samples_df = get_samples_csv()

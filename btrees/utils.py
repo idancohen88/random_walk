@@ -2,7 +2,7 @@ import math
 import os
 import ast
 from itertools import zip_longest
-
+from BTrees import check as btree_check
 import pandas as pd
 import matplotlib.pyplot as plt
 from btrees.common import SAMPLING_TESTS_CSV
@@ -63,3 +63,14 @@ def _unpickle_df_sampled_values_counter(df):
     sampled_values_counter_lists = map(ast.literal_eval, sampled_values_counter_strs)
     group_to_sizes = list(map(dict, sampled_values_counter_lists))
     return group_to_sizes
+
+
+def btree_display(btree):
+    # btree was manipulated so it will work with BtreeExt as well:
+    # venv/lib/python3.6/site-packages/BTrees/check.py:119
+    btree_check.display(btree)
+
+
+def get_btree_structure(btree):
+    # need to run on every level and use .size
+    pass

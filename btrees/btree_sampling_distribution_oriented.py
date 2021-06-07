@@ -32,6 +32,10 @@ class OOBTreeExtFanoutOriented(OOBTreeBase):
 
         self._persist_sampling_stats(start_time=start_time,sampled_values=sampled_values,
                                      name='distribution_oriented_height_three', sample_size=k)
+
+        self.save_sampled_path(name='distribution_oriented_height_three',
+                               k=k,
+                               sampled_paths=sampled_paths)
         return sampled_values
 
     def _fanout_oriented_random_walk_node_to_item(self, node):
@@ -77,6 +81,10 @@ class OOBTreeExtFanoutOriented(OOBTreeBase):
 
         self._persist_sampling_stats(start_time=start_time, sampled_values=sampled_values,
                                      name='distribution_oriented_height_four', sample_size=k)
+
+        self.save_sampled_path(name='distribution_oriented_height_four',
+                               k=k,
+                               sampled_paths=sampled_paths)
         return sampled_values
 
     def _first_walk_to_determine_root_coefs(self):

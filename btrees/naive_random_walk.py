@@ -27,6 +27,10 @@ class OOBTreeExtNaiveRandomWalk(OOBTreeBase):
             sample_size=k,
         )
 
+        self.save_sampled_path(name="naive_random_walk",
+                               k=k,
+                               sampled_paths=sampled_paths)
+
         return sampled_values
 
     def _naive_random_walk_to_leaf(self):

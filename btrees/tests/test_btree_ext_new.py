@@ -52,6 +52,11 @@ def test_naive_random_walk_sanity():
     my_index = _generate_3_height_btree()
     assert len(my_index.sample_naive_random_walk(sample_size)) == sample_size
 
+    sampled_path_key_tuples = list(my_index.sampled_paths.keys())[0]
+    sample_name, sample_size = sampled_path_key_tuples
+    relevant_sampled_path = my_index.sampled_paths[sampled_path_key_tuples][0]
+    assert len(relevant_sampled_path) == sample_size
+
 def test_all_sampling_methods_write_to_csv_with_all_metadata__also_dummies():
     my_index = _generate_3_height_btree()
     my_index.run_all_samples(k=1, iterations=1, run_also_dummies=True)
@@ -88,10 +93,13 @@ def test_btwrs_vs_olken_higher_prob():
 def test_ours_height_three_sanity():
     sample_size = 3
     my_index = _generate_3_height_btree()
-    assert (
-        len(my_index.sample_distribution_oriented_height_three(sample_size))
-        == sample_size
-    )
+    sampled_dist_oritented = my_index.sample_distribution_oriented_height_three(sample_size)
+    assert len(sampled_dist_oritented) == sample_size
+
+    sampled_path_key_tuples = list(my_index.sampled_paths.keys())[0]
+    sample_name, sample_size = sampled_path_key_tuples
+    relevant_sampled_path = my_index.sampled_paths[sampled_path_key_tuples][0]
+    assert len(relevant_sampled_path) == sample_size
 
 def test_dataframe_to_histogram():
     df_dataset = {"sampled_values_counter": "[('', 247), ('gggg', 117), ('hhhh', 77), ('mmmm', 53), ('rrrr', 6)]",
@@ -178,10 +186,13 @@ def test_sample_distribution_height_four():
     sample_size = 3
     my_index = _generate_4_height_btree()
     my_index._data_generation_method = 'test'
-    assert (
-        len(my_index.sample_distribution_oriented_height_four(sample_size))
-        == sample_size
-    )
+    sampled_values = my_index.sample_distribution_oriented_height_four(sample_size)
+    assert len(sampled_values) == sample_size
+
+    sampled_path_key_tuples = list(my_index.sampled_paths.keys())[0]
+    sample_name, sample_size = sampled_path_key_tuples
+    relevant_sampled_path = my_index.sampled_paths[sampled_path_key_tuples][0]
+    assert len(relevant_sampled_path) == sample_size
 
 
 def test_ours_height_four__walk_to_determine_root_coefs():

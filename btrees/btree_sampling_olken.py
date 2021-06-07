@@ -27,6 +27,9 @@ class OOBTreeExtOlken(OOBTreeBase):
         self._persist_sampling_stats(reject_counter=reject_counter, start_time=start_time, sampled_values=sampled_values,
                                      name='olken_early_abort', sample_size=k)
 
+        self.save_sampled_path(name='olken_early_abort',
+                               k=k,
+                               sampled_paths=sampled_paths)
         return sampled_values
 
     def sample_olken(self, k):
@@ -34,23 +37,27 @@ class OOBTreeExtOlken(OOBTreeBase):
         k = self._min_between_k_and_btree_size(k)
         start_time = datetime.now()
         sampled_values = []
-        sampled_path = []
+        sampled_paths = []
         reject_counter = 0
         while len(sampled_values) < k:
             value, acc_rej_prob, path = self._olken_walk_toward_bucket(node=self)
 
-            if path in sampled_path:
+            if path in sampled_paths:
                 continue  # todo: revisited
 
             if _accept_reject_test_pass(acc_rej_prob):
                 sampled_values.append(value)
-                sampled_path.append(path)
+                sampled_paths.append(path)
                 continue
 
             reject_counter += 1
 
         self._persist_sampling_stats(reject_counter=reject_counter, start_time=start_time, sampled_values=sampled_values,
                                      name='olken', sample_size=k)
+
+        self.save_sampled_path(name='olken',
+                               k=k,
+                               sampled_paths=sampled_paths)
         return sampled_values
 
     def _olken_walk_toward_bucket(self, node):
