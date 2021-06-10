@@ -7,6 +7,7 @@ import numpy as np
 from BTrees.OOBTree import OOBTreePy
 from scipy import stats
 
+from btrees import utils
 from btrees.common import SAMPLING_TESTS_CSV
 from btrees.utils import get_samples_csv
 
@@ -37,11 +38,19 @@ class OOBTreeBase(OOBTreePy):
         self._data_generation_method = None
         self.btree_id = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
         self.sampled_paths = defaultdict(list)
+        self._real_data_distribution_value = None
 
     @property
     def _btree_size(self):
         self._btree_size_value = self._btree_size_value or len(self.values())
         return self._btree_size_value
+
+    @property
+    def _real_data_distribution(self):
+        if self._real_data_distribution_value:
+            return self._real_data_distribution_value
+        self._real_data_distribution_value = utils.samples_to_counter_percent(self.values())
+        return self._real_data_distribution_value
 
     @property
     def _btree_height(self):
@@ -101,6 +110,8 @@ class OOBTreeBase(OOBTreePy):
             sampled_values, sample_size
         )
 
+        dist_equality_score = utils.score_clusters_diff(sampled_values, self._real_data_distribution)
+
         sampled_csv = self._append_to_df(
             name=name,
             start_time=start_time,
@@ -119,6 +130,7 @@ class OOBTreeBase(OOBTreePy):
             domain_size=self._domain_size,
             data_generation_method=self._data_generation_method,
             btree_id=self.btree_id,
+            dist_equality_score=dist_equality_score,
         )
 
         self._clean_counters()

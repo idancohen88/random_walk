@@ -1,6 +1,7 @@
 import math
 import os
 import ast
+from collections import Counter
 from itertools import zip_longest
 from BTrees import check as btree_check
 import pandas as pd
@@ -28,7 +29,37 @@ def dataframe_to_histogram(df):
     for bunch_of_rows in grouped(zip(groups_to_percents, df.iterrows()), PLOTS_PER_LINE):
         _dataframe_to_histogram_every_3_subplots(bunch_of_rows)
 
+def samples_to_counter_percent(samples):
+    if not samples:
+        return
 
+    if isinstance(samples[0], tuple):
+        samples = [x[1] for x in samples]
+
+    samples_counter = Counter(samples)
+    return _counter_to_percent(samples_counter)
+
+
+def samples_to_histogram(samples, should_print=True, show_hist=True):
+    samples_counter_percent=samples_to_counter_percent(samples)
+
+    if should_print:
+        print(samples_counter_percent)
+
+    if show_hist:
+        pd.DataFrame([samples_counter_percent]).plot(kind='bar')
+
+
+def score_clusters_diff(samples, expected_cluster_dist):
+    if not samples:
+        return
+
+    if isinstance(samples[0], tuple):
+        samples = [x[1] for x in samples]
+
+    samples_percents = samples_to_counter_percent(samples)
+
+    return sum([abs(value - samples_percents.get(key, 0)) for key, value in expected_cluster_dist.items()])
 
 def _dataframe_to_histogram_every_3_subplots(groups_to_percents_and_df):
     assert len(groups_to_percents_and_df) <= PLOTS_PER_LINE

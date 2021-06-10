@@ -23,7 +23,7 @@ MAX_LEAF_SIZE = 5
 
 CSV_FIELDS = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
         "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method", "btree_id"}
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method", "btree_id", "dist_equality_score"}
 MANDATORY_FIELDS = CSV_FIELDS - {"p_value", "reject_counter", "skew_factor", "domain_size"}
 
 
