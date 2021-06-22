@@ -11,7 +11,7 @@ from btrees import utils
 from btrees.btree_base import SAMPLING_METHODS, DUMMIES_SAMPLING_METHODS
 from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist, \
-    generate_zipf_dist_in_random_order
+    generate_zipf_dist_in_random_order, _pad_numeric_value, _unpad_numeric_value
 from BTrees.OOBTree import OOBTreePy
 
 from btrees.btree_ext import OOBTreeExt
@@ -23,7 +23,8 @@ MAX_LEAF_SIZE = 5
 
 CSV_FIELDS = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
         "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
-        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method", "btree_id", "dist_equality_score"}
+        "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method", "btree_id",
+              "dist_equality_score", "kl_divergence", "purity_score"}
 MANDATORY_FIELDS = CSV_FIELDS - {"p_value", "reject_counter", "skew_factor", "domain_size"}
 
 
@@ -241,9 +242,16 @@ def test_generate_zipf_dist_random_order__sanity():
     assert set(my_index_uniform.values()) > set(my_index_skewed.values())
 
 
+def test_generate_zipf_dist_random_order__btree_order_correct_with_padding():
+    my_index = generate_zipf_dist_in_random_order(num_of_values=50, domain_size=50, skew_factor=0)
+
+    ordered_query = list(my_index.itervalues())
+    assert ordered_query == sorted(ordered_query)
+
+
 def test_generate_zipf_dist__sanity():
     my_index_uniform = generate_zipf_dist(num_of_values=50, domain_size=50, skew_factor=0)
-    my_index_skewed = generate_zipf_dist(num_of_values=50, domain_size=50, skew_factor=0.9)
+    my_index_skewed = generate_zipf_dist(num_of_values=500, domain_size=50, skew_factor=0.9)
     assert set(my_index_uniform.values()) > set(my_index_skewed.values())
 
 
@@ -255,3 +263,21 @@ def test_all_samples_protected_from_big_k_size():
     my_index.run_all_samples(k=2)
     my_index._data_generation_method = 'test'
     assert True, 'otherwise, never finish'
+
+
+
+def test_pad_numeric_value__sanity():
+    arbitrary_numbers = [100, 0, 3782, 999_999, 10_000_000]
+    sorted_arbitrary_numbers = sorted(arbitrary_numbers)
+    sorted_padded_numbers = sorted(map(_pad_numeric_value, arbitrary_numbers))
+
+    unpadded_values = list(map(_unpad_numeric_value, sorted_padded_numbers))
+    assert unpadded_values == sorted_arbitrary_numbers
+
+def test_pad_numeric_value__equal_values():
+    arbitrary_numbers = [100, 100]
+    padded_numbers = list(map(_pad_numeric_value, arbitrary_numbers))
+    assert len(set(padded_numbers)) == 2
+
+    unpadded_values = list(map(_unpad_numeric_value, padded_numbers))
+    assert set(unpadded_values) == {100,}

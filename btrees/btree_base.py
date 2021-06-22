@@ -112,6 +112,9 @@ class OOBTreeBase(OOBTreePy):
 
         dist_equality_score = utils.score_clusters_diff(sampled_values, self._real_data_distribution)
 
+        kl_divergence = self._calc_kl_divergence(sampled_values)
+        purity_score = self._calc_purity(sampled_values)
+
         sampled_csv = self._append_to_df(
             name=name,
             start_time=start_time,
@@ -131,6 +134,8 @@ class OOBTreeBase(OOBTreePy):
             data_generation_method=self._data_generation_method,
             btree_id=self.btree_id,
             dist_equality_score=dist_equality_score,
+            kl_divergence=kl_divergence,
+            purity_score=purity_score,
         )
 
         self._clean_counters()
@@ -140,6 +145,28 @@ class OOBTreeBase(OOBTreePy):
                                sampled_paths):
         self.sampled_paths[(name,k)].append(sampled_paths)
 
+    def _calc_kl_divergence(self, sampled_values):
+        real_data_keys_sorted = sorted(self._real_data_distribution.keys())
+        sampled_values_counter_percent = utils.samples_to_counter_percent(sampled_values)
+        real_data_counter_arr = [self._real_data_distribution[key] for key in real_data_keys_sorted]
+        sampled_values_counter_arr = [sampled_values_counter_percent.get(key,0) for key in real_data_keys_sorted]
+
+        real_data_counter_arr = np.asarray(real_data_counter_arr, dtype=np.float)
+        sampled_values_counter_arr = np.asarray(sampled_values_counter_arr, dtype=np.float)
+
+        kl_div = np.sum(np.where(sampled_values_counter_arr != 0, real_data_counter_arr * np.log(real_data_counter_arr / sampled_values_counter_arr), 0))
+
+        return kl_div
+
+
+    def _calc_purity(self, sampled_values):
+        assert len(self._np_samples) # todo: change to property
+        counter_np_samples = Counter(self._np_samples)
+        sampled_values_counter = Counter(sampled_values)
+        sum([min(value, counter_np_samples.get(key,0)) for key, value in sampled_values_counter.items()]) / sum(counter_np_samples.values())
+
+
+
     def _append_to_df(self, **kwargs):
         samples_df = get_samples_csv()
 
@@ -148,6 +175,7 @@ class OOBTreeBase(OOBTreePy):
         return samples_df
 
     def _calculate_ks_test(self, sampled_values, sample_size):
+        # todo: to property
         if len(self._np_samples) == 0 or len(self._np_samples) != sample_size:
             self._np_samples = np.random.choice(self.values(), sample_size)
         return stats.ks_2samp(self._np_samples, sampled_values)

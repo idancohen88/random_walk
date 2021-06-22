@@ -12,6 +12,7 @@ CHUNKS_SIZE = 10000
 KEY_LENGTH = 8
 ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+MAX_ZIPF_INT = 10_000_000_000
 
 def generate_btree_index_x_values_with_dist(
     num_of_values, disired_prefix_to_percent_dist, my_index=None
@@ -119,13 +120,25 @@ def generate_zipf_dist(num_of_values, domain_size, skew_factor=0):
     return my_index
 
 
+def _pad_numeric_value(number):
+    # we are padding each number to len(str(MAX_ZIPF_INT)), and then adding 5 random digits.
+    number = MAX_ZIPF_INT + number
+    random_digits = random.randint(10_000, 99_999)
+    number = int(str(number) + str(random_digits))
+    return number
+
+def _unpad_numeric_value(number):
+    return int(str(number)[:-5]) - MAX_ZIPF_INT
+
+
+
 def _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor):
     relation_size = num_of_values
     z = skew_factor
-    freqs = {}
+    num_to_freqs = {}
     zipf_denominator = sum(1 / inner_i ** z for inner_i in range(1, domain_size + 1))
     for i in range(1, domain_size + 1):
-        freqs[i] = relation_size * (1 / i ** z) / zipf_denominator
-    data = _freqs_to_data(freqs)
-    data = dict(zip(range(len(data)), data))
+        num_to_freqs[i] = relation_size * (1 / i ** z) / zipf_denominator
+    data = _freqs_to_data(num_to_freqs)
+    data = dict(zip(map(_pad_numeric_value, data), data))
     return data
