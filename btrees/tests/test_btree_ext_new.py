@@ -24,7 +24,7 @@ MAX_LEAF_SIZE = 5
 CSV_FIELDS = {"sample_size", "p_value", "ks_stats", "name", "start_time", "sampled_values_counter",
         "running_time", "reject_counter", "max_leaf_size", "max_internal_size", "btree_size",
         "btree_height", "distinct_values_error", "skew_factor", "domain_size" , "data_generation_method", "btree_id",
-              "dist_equality_score", "kl_divergence", "purity_score"}
+              "dist_equality_score", "kl_divergence", "purity_score", "btree_code_version",}
 MANDATORY_FIELDS = CSV_FIELDS - {"p_value", "reject_counter", "skew_factor", "domain_size"}
 
 
@@ -249,10 +249,10 @@ def test_generate_zipf_dist_random_order__btree_order_correct_with_padding():
     assert ordered_query == sorted(ordered_query)
 
 
-def test_generate_zipf_dist__sanity():
-    my_index_uniform = generate_zipf_dist(num_of_values=50, domain_size=50, skew_factor=0)
-    my_index_skewed = generate_zipf_dist(num_of_values=500, domain_size=50, skew_factor=0.9)
-    assert set(my_index_uniform.values()) > set(my_index_skewed.values())
+# def test_generate_zipf_dist__sanity():
+#     my_index_uniform = generate_zipf_dist(num_of_values=50, domain_size=50, skew_factor=0)
+#     my_index_skewed = generate_zipf_dist(num_of_values=500, domain_size=50, skew_factor=0.9)
+#     assert set(my_index_uniform.values()) > set(my_index_skewed.values())
 
 
 def test_all_samples_protected_from_big_k_size():

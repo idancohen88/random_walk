@@ -21,6 +21,7 @@ SAMPLING_METHODS = [
     "sample_btwrs",
 ]
 
+BTREE_CODE_VERSION = 1.0
 DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy", "sample_naive_random_walk"]
 
 
@@ -39,6 +40,7 @@ class OOBTreeBase(OOBTreePy):
         self.btree_id = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
         self.sampled_paths = defaultdict(list)
         self._real_data_distribution_value = None
+        self._btree_code_version = BTREE_CODE_VERSION
 
     @property
     def _btree_size(self):
@@ -136,6 +138,7 @@ class OOBTreeBase(OOBTreePy):
             dist_equality_score=dist_equality_score,
             kl_divergence=kl_divergence,
             purity_score=purity_score,
+            btree_code_version=self._btree_code_version,
         )
 
         self._clean_counters()
