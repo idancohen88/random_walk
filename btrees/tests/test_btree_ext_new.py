@@ -8,7 +8,7 @@ import pytest
 from numpy import random
 
 from btrees import utils
-from btrees.btree_base import SAMPLING_METHODS, DUMMIES_SAMPLING_METHODS
+from btrees.btree_base import SAMPLING_METHODS, DUMMIES_SAMPLING_METHODS, KS_AVG_X_ITERS
 from build_tree import build_tree
 from build_tree.build_tree import ALPHABET, overriding_btree_max_leaf_size, generate_zipf_dist, \
     generate_zipf_dist_in_random_order, _pad_numeric_value, _unpad_numeric_value
@@ -264,6 +264,15 @@ def test_all_samples_protected_from_big_k_size():
     my_index._data_generation_method = 'test'
     assert True, 'otherwise, never finish'
 
+def test_calculate_avg_ks_test():
+    my_index = generate_zipf_dist_in_random_order(num_of_values=50, domain_size=50, skew_factor=0)
+    with patch.object(my_index, '_calculate_avg_ks_test', wraps=my_index._calculate_avg_ks_test) as spy_avg_ks,\
+        patch.object(my_index, '_calculate_ks_test', wraps=my_index._calculate_ks_test) as spy_ks:
+        my_index.sample_distribution_oriented_height_four(1)
+        assert spy_avg_ks.assert_called_once
+        assert spy_ks.call_count == KS_AVG_X_ITERS
+        force_train_params = [x[-1] for x in spy_ks.call_args_list]
+        assert force_train_params == [{'force_new_np_sample': True}] * KS_AVG_X_ITERS
 
 
 def test_pad_numeric_value__sanity():

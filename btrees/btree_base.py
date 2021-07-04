@@ -21,8 +21,11 @@ SAMPLING_METHODS = [
     "sample_btwrs",
 ]
 
-BTREE_CODE_VERSION = 1.0
+BTREE_CODE_VERSION = "1.0_avg_5_ks_stats"
 DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy", "sample_naive_random_walk"]
+
+
+KS_AVG_X_ITERS=5
 
 
 class OOBTreeBase(OOBTreePy):
@@ -90,6 +93,16 @@ class OOBTreeBase(OOBTreePy):
         # saving the value, even if it's mocked
         return self.max_internal_size
 
+    def _calculate_avg_ks_test(self, sampled_values, sample_size):
+        all_ks_stats = []
+        all_p_values = []
+        for _ in range(KS_AVG_X_ITERS):
+            ks_stats, p_value = self._calculate_ks_test(sampled_values, sample_size, force_new_np_sample=True)
+            all_ks_stats.append(ks_stats)
+            all_p_values.append(p_value)
+
+        return sum(all_ks_stats)/len(all_ks_stats), sum(all_p_values)/len(all_p_values)
+
     def _persist_sampling_stats(self, **kwargs):
         assert self._data_generation_method, "must define _data_generation_method"
         end_time = datetime.now()
@@ -102,7 +115,7 @@ class OOBTreeBase(OOBTreePy):
 
         running_time = (end_time - start_time).seconds
 
-        ks_stats, p_value = self._calculate_ks_test(sampled_values, sample_size)
+        ks_stats, p_value  = self._calculate_avg_ks_test(sampled_values, sample_size)
 
         sampled_values_counter = Counter(sampled_values).most_common(
             STATS_TOP_X_TO_SHOW
@@ -177,9 +190,9 @@ class OOBTreeBase(OOBTreePy):
         samples_df.to_csv(SAMPLING_TESTS_CSV, index=False)
         return samples_df
 
-    def _calculate_ks_test(self, sampled_values, sample_size):
+    def _calculate_ks_test(self, sampled_values, sample_size, force_new_np_sample=False):
         # todo: to property
-        if len(self._np_samples) == 0 or len(self._np_samples) != sample_size:
+        if len(self._np_samples) == 0 or len(self._np_samples) != sample_size or force_new_np_sample:
             self._np_samples = np.random.choice(self.values(), sample_size)
         return stats.ks_2samp(self._np_samples, sampled_values)
 
