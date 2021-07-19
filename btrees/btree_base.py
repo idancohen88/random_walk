@@ -21,7 +21,7 @@ SAMPLING_METHODS = [
     "sample_btwrs",
 ]
 
-BTREE_CODE_VERSION = "1.0_avg_5_ks_stats"
+BTREE_CODE_VERSION = "1.02_rel_error_change"
 DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy", "sample_naive_random_walk"]
 
 
@@ -228,10 +228,12 @@ class OOBTreeBase(OOBTreePy):
         group_size_to_number_of_groups = self._calculate_group_size_to_number_of_groups(
             sampled_values
         )
+        f1 = group_size_to_number_of_groups.pop(1, None) or 1
+        # tries another explanation for this definition:
+        group_size_to_number_of_distinct_values = {
+            key: key * value for key, value in group_size_to_number_of_groups.items()}
 
-        f1 = group_size_to_number_of_groups.get(1, 1)
-        group_size_to_number_of_groups.pop(1, None)
-        all_other_f_sums = sum(group_size_to_number_of_groups.values())
+        all_other_f_sums = sum(group_size_to_number_of_distinct_values.values())
         estimator = sqrt(self._btree_size / sample_size) * f1 + all_other_f_sums
         return estimator
 
