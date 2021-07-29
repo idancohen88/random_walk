@@ -21,7 +21,7 @@ SAMPLING_METHODS = [
     "sample_btwrs",
 ]
 
-BTREE_CODE_VERSION = "1.02_rel_error_change"
+BTREE_CODE_VERSION = "1.1_anderson_darling"
 DUMMIES_SAMPLING_METHODS = ["sample_monkey", "sample_numpy", "sample_naive_random_walk"]
 
 
@@ -130,6 +130,9 @@ class OOBTreeBase(OOBTreePy):
         kl_divergence = self._calc_kl_divergence(sampled_values)
         purity_score = self._calc_purity(sampled_values)
 
+        anderson_darling = self._calc_anderson_darling(sampled_values)
+        anderson_dar_signif, anderson_dar_stats = anderson_darling
+
         sampled_csv = self._append_to_df(
             name=name,
             start_time=start_time,
@@ -151,6 +154,8 @@ class OOBTreeBase(OOBTreePy):
             dist_equality_score=dist_equality_score,
             kl_divergence=kl_divergence,
             purity_score=purity_score,
+            anderson_dar_stats=anderson_dar_stats,
+            anderson_dar_significant=anderson_dar_signif,
             btree_code_version=self._btree_code_version,
         )
 
@@ -160,6 +165,14 @@ class OOBTreeBase(OOBTreePy):
     def save_sampled_path(self, name,k,
                                sampled_paths):
         self.sampled_paths[(name,k)].append(sampled_paths)
+
+    def _calc_anderson_darling(self, sampled_values):
+        if len(sampled_values) < 2:
+            # anderson_ksamp needs more than one distinct observation
+            return 0, 0
+        anderson_ksamp = stats.anderson_ksamp([sampled_values, self.values()])
+        anderson_stats, _, signnificat_level = anderson_ksamp
+        return anderson_stats, signnificat_level
 
     def _calc_kl_divergence(self, sampled_values):
         real_data_keys_sorted = sorted(self._real_data_distribution.keys())
