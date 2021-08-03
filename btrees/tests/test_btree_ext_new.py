@@ -70,6 +70,22 @@ def test_all_sampling_methods_write_to_csv_with_all_metadata__also_dummies():
     assert all([len(csv[field].notnull()) == expected_sampling_methods for field in MANDATORY_FIELDS])
 
 
+def test_sampling__sanity_for_anderson_darling():
+    k_which_anderson_skip = 1
+    expected_significant_level = [0.25, 0.25]
+    k = 3
+    assert k > k_which_anderson_skip
+    my_index = _generate_3_height_btree()
+    my_index.run_sample_methods(k, iterations=1, sampling_methods=['sample_olken', 'sample_olken_early_abort'])
+    csv = pd.read_csv(SAMPLING_TESTS_CSV)
+    anderson_darling_stats_column = csv['anderson_dar_stats'].to_list()
+    anderson_dar_significant_column = csv['anderson_dar_significant'].to_list()
+
+    assert len(anderson_darling_stats_column)
+    assert all(isinstance(x, float) for x in anderson_darling_stats_column)
+
+    assert anderson_dar_significant_column == expected_significant_level
+
 
 def test_all_sampling_methods_write_to_csv_with_all_metadata():
     my_index = _generate_3_height_btree()
@@ -234,7 +250,7 @@ def test_run_all_samples__sanity():
     my_index = _generate_4_height_btree()
     my_index._data_generation_method = 'test'
     my_index.run_all_samples(1,1)
-    my_index._data_generation_method = 'test'
+    assert my_index._data_generation_method == 'test'
 
 def test_generate_zipf_dist_random_order__sanity():
     my_index_uniform = generate_zipf_dist_in_random_order(num_of_values=50, domain_size=50, skew_factor=0)
