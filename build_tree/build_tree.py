@@ -11,7 +11,7 @@ from btrees.btree_ext import OOBTreeExt
 CHUNKS_SIZE = 10000
 KEY_LENGTH = 8
 ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
+INT_SUFFIX_LEN = 10
 MAX_ZIPF_INT = 10_000_000_000
 
 def generate_btree_index_x_values_with_dist(
@@ -123,13 +123,13 @@ def generate_zipf_dist(num_of_values, domain_size, skew_factor=0):
 def _pad_numeric_value(number):
     # we are padding each number to len(str(MAX_ZIPF_INT)), and then adding 5 random digits.
     number = MAX_ZIPF_INT + number
-    random_digits = random.randint(10_000, 99_999)
+    random_digits = random.randint(1_000_000_000, 9_999_999_999)
+    assert len(str(random_digits)) == INT_SUFFIX_LEN
     number = int(str(number) + str(random_digits))
     return number
 
 def _unpad_numeric_value(number):
-    return int(str(number)[:-5]) - MAX_ZIPF_INT
-
+    return int(str(number)[:-INT_SUFFIX_LEN]) - MAX_ZIPF_INT
 
 
 def _generate_zipf_key_value_data(domain_size, num_of_values, skew_factor):
