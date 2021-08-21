@@ -10,6 +10,9 @@ from scipy import stats
 from btrees import utils
 from btrees.common import SAMPLING_TESTS_CSV
 from btrees.utils import get_samples_csv
+from filelock import FileLock
+
+LOCK_FILENAME = "filelock.lock"
 
 STATS_TOP_X_TO_SHOW = 20
 
@@ -204,10 +207,12 @@ class OOBTreeBase(OOBTreePy):
 
 
     def _append_to_df(self, **kwargs):
-        samples_df = get_samples_csv()
+        lock = FileLock(LOCK_FILENAME)
+        with lock:
+            samples_df = get_samples_csv()
+            samples_df = samples_df.append([kwargs], ignore_index=True)
+            samples_df.to_csv(SAMPLING_TESTS_CSV, index=False)
 
-        samples_df = samples_df.append([kwargs], ignore_index=True)
-        samples_df.to_csv(SAMPLING_TESTS_CSV, index=False)
         return samples_df
 
     def _calculate_ks_test(self, sampled_values, sample_size, force_new_np_sample=False):
