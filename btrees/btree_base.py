@@ -133,6 +133,8 @@ class OOBTreeBase(OOBTreePy):
         anderson_darling = self._calc_anderson_darling(sampled_values, sample_size)
         anderson_dar_stats, anderson_dar_signif = anderson_darling
 
+        real_data_distribution_top = dict(sorted(self._real_data_distribution.items(), key=lambda x: x[1])[:20])
+
         sampled_csv = self._append_to_df(
             name=name,
             start_time=start_time,
@@ -157,6 +159,7 @@ class OOBTreeBase(OOBTreePy):
             anderson_dar_stats=anderson_dar_stats,
             anderson_dar_significant=anderson_dar_signif,
             btree_code_version=self._btree_code_version,
+            real_data_distribution_top=real_data_distribution_top,
         )
 
         self._clean_counters()
