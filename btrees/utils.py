@@ -10,7 +10,6 @@ from btrees.common import SAMPLING_TESTS_CSV
 
 PLOTS_PER_LINE = 3
 
-
 def get_samples_csv():
     if os.path.isfile(SAMPLING_TESTS_CSV):
         df =  pd.read_csv(SAMPLING_TESTS_CSV)

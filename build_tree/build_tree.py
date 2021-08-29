@@ -14,6 +14,55 @@ ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 INT_SUFFIX_LEN = 10
 MAX_ZIPF_INT = 10_000_000_000
 
+DEFAULT_SAMPLING_METHODS = ["sample_olken_early_abort",
+                "sample_distribution_oriented_height_four",
+                "sample_distribution_oriented_height_three",
+                "sample_naive_random_walk", ]
+
+
+def create_zipf_data_and_run_samples(num_of_values, domain_size, skew_factor=0, sampling_sizes=None,
+                                     sampling_methods=None):
+    print(f'running with num_of_values={num_of_values} domain_size={domain_size} skew_factor={skew_factor}')
+    sampling_methods = sampling_methods or DEFAULT_SAMPLING_METHODS
+    index = generate_zipf_dist_in_random_order(num_of_values, domain_size, skew_factor)
+
+    if index._btree_height == 4 and "sample_distribution_oriented_height_three" in sampling_methods:
+        sampling_methods.remove("sample_distribution_oriented_height_three")
+    if index._btree_height == 3 and "sample_distribution_oriented_height_four" in sampling_methods:
+        sampling_methods.remove("sample_distribution_oriented_height_four")
+
+    if index._btree_height > 2:
+        assert not ("sample_distribution_oriented_height_three" in sampling_methods and
+                    "sample_distribution_oriented_height_four" in sampling_methods)
+    print('sampling methods: ', sampling_methods)
+    sampling_sizes = sampling_sizes or [num_of_values * 0.005, num_of_values * 0.01, num_of_values * 0.05,
+                                        num_of_values * 0.1]
+    sampling_sizes = list(map(int, sampling_sizes))
+    index.run_sample_methods(k=sampling_sizes, iterations=3, sampling_methods=sampling_methods)
+
+
+def create_clustered_data_and_run_samples(num_of_values, prefix_to_percent, sampling_sizes=None, sampling_methods=None):
+    print(f'running with num_of_values={num_of_values}')
+    index = generate_btree_index_x_values_with_dist(num_of_values, prefix_to_percent)
+
+    sampling_methods = sampling_methods or DEFAULT_SAMPLING_METHODS
+
+    if index._btree_height == 4 and "sample_distribution_oriented_height_three" in sampling_methods:
+        sampling_methods.remove("sample_distribution_oriented_height_three")
+    if index._btree_height == 3 and "sample_distribution_oriented_height_four" in sampling_methods:
+        sampling_methods.remove("sample_distribution_oriented_height_four")
+
+    if index._btree_height > 2:
+        assert not ("sample_distribution_oriented_height_three" in sampling_methods and
+                    "sample_distribution_oriented_height_four" in sampling_methods)
+
+    print('generated btree with id %s' % index.btree_id)
+    sampling_sizes = sampling_sizes or [num_of_values * 0.005, num_of_values * 0.01, num_of_values * 0.05,
+                                        num_of_values * 0.1]
+    sampling_sizes = list(map(int, sampling_sizes))
+    index.run_sample_methods(k=sampling_sizes, iterations=3, sampling_methods=sampling_methods)
+
+
 def generate_btree_index_x_values_with_dist(
     num_of_values, disired_prefix_to_percent_dist, my_index=None
 ):
